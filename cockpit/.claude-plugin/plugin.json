@@ -1,0 +1,19 @@
+{
+  "name": "cockpit",
+  "version": "0.2.0",
+  "description": "A one-line band above the prompt (prompt-cache countdown, context, limits, cost, 9router, next task, Continue / What's next / Compact) plus guards: no Claude co-author trailers, pasted API keys held back, impeccable nudge on UI prompts.",
+  "author": {
+    "name": "cGradying"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "dependencies": [
+    "replay-theater",
+    "blast-radius",
+    "savvy-progress",
+    "cache-tax",
+    "reflect-mod",
+    "filetree",
+    "skins"
+  ]
+}

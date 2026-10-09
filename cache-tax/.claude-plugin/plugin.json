@@ -1,0 +1,31 @@
+{
+  "name": "cache-tax",
+  "version": "2.2.1",
+  "description": "A Claude Code mod that keeps the one-hour prompt cache warm during breaks and stops a cold send once with its estimated rewrite cost. Warming uses model requests and costs tokens. Requires Claude Code 2.1.287+.",
+  "author": {
+    "name": "Karan Bansal"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "guard": {
+      "type": "string",
+      "title": "Cold-send guard",
+      "description": "warn shows the rewrite price and still sends. refuse holds your first cold message once and asks you to resend.",
+      "default": "warn",
+      "options": [
+        "warn",
+        "refuse"
+      ]
+    },
+    "autoWarm": {
+      "type": "string",
+      "title": "Auto keep-warm after a paid cold write",
+      "description": "on arms a 3h keep-warm window by itself, which sends a model request about every 50 minutes. off only extends a window you opened with /keepwarm.",
+      "default": "off",
+      "options": [
+        "off",
+        "on"
+      ]
+    }
+  }
+}

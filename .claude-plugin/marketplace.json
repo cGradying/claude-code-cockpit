@@ -1,0 +1,51 @@
+{
+  "name": "janvin-mods",
+  "owner": {
+    "name": "cGradying"
+  },
+  "metadata": {
+    "description": "cGradying's Claude Code mods: the cockpit band and guards, and vendored community mods, patched to start quiet."
+  },
+  "plugins": [
+    {
+      "name": "cockpit",
+      "source": "./cockpit",
+      "description": "Band above the prompt, guards, and a cheat sheet. Depends on the seven mods below, so installing it installs them all."
+    },
+    {
+      "name": "replay-theater",
+      "source": "./replay-theater",
+      "description": "Step through the file edits Claude made in the last turn (Anthropic playground, Apache-2.0)."
+    },
+    {
+      "name": "blast-radius",
+      "source": "./blast-radius",
+      "description": "Hold rm -rf, git reset --hard, force push and migrations until you press Proceed (Anthropic playground, Apache-2.0)."
+    },
+    {
+      "name": "savvy-progress",
+      "source": "./savvy-progress",
+      "description": "Progress bar and agents panel for flows and subagents (JohnnyVizz, MIT)."
+    },
+    {
+      "name": "cache-tax",
+      "source": "./cache-tax",
+      "description": "Cold-send price warning and opt-in keep-warm for the prompt cache (karanb192, MIT). Patched: warn, keep-warm off."
+    },
+    {
+      "name": "reflect-mod",
+      "source": "./reflect-mod",
+      "description": "Turns corrections into rules you can save to CLAUDE.md (BayramAnnakov, MIT). Patched: starts paused."
+    },
+    {
+      "name": "filetree",
+      "source": "./filetree",
+      "description": "IDE-style file tree in the sidebar with git status and activity (data-goblin, MIT)."
+    },
+    {
+      "name": "skins",
+      "source": "./skins",
+      "description": "Skins for the transcript, /skin to swap (hellosverre, MIT). Patched: starts off, own band off."
+    }
+  ]
+}

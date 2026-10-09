@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="30" viewBox="0 0 880 30">
+<style>
+  svg { color-scheme: dark light; background: var(--bg);
+        --bg:#212121; --fg:#ebe9e1; --dim:#8e8b83; --track:rgba(255,255,255,.08);
+        --clay:#d97757; --ok:#6cc085; --mid:#e3a84f; --bad:#ec6a5e; }
+  @media (prefers-color-scheme: light) {
+    svg { --bg:#faf9f5; --fg:#1f1e1d; --dim:#6b675f; --track:rgba(31,30,29,.09);
+          --clay:#c15f3c; --ok:#2e8b4c; --mid:#a86d12; --bad:#c2410c; }
+  }
+  text:not([fill]) { fill: var(--fg); }
+  .label { font: 500 11px ui-sans-serif, -apple-system, system-ui, sans-serif; fill: var(--dim); }
+  .label.down { fill: var(--bad); font-weight: 600; }
+  .num { font: 500 11.5px ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .dim { fill: var(--dim); }
+  .state { font-weight: 600; font-family: ui-sans-serif, -apple-system, system-ui, sans-serif; font-size: 11.5px; }
+  .num.state { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .task { font: 400 12px ui-sans-serif, -apple-system, system-ui, sans-serif; }
+  .task.empty { fill: var(--dim); }
+  .next { font: 600 11px ui-sans-serif, -apple-system, system-ui, sans-serif; fill: var(--clay); }
+  .track { fill: var(--track); }
+  .track-ring { fill: none; stroke: var(--track); stroke-width: 1.8; }
+  .ring { fill: none; stroke-width: 1.8; stroke-linecap: round; }
+  .flare { fill: none; stroke: var(--clay); stroke-width: 1.8; opacity: 0; }
+  .m-ok { fill: var(--ok); } .m-mid { fill: var(--mid); } .m-bad { fill: var(--bad); }
+  .spin rect { fill: var(--clay); }
+  .g { transform-box: fill-box; transform-origin: center; }
+  .ripple { fill: none; stroke-width: 1.2; opacity: 0; }
+
+  .m { animation-duration: .45s; animation-timing-function: cubic-bezier(.16,1,.3,1); animation-fill-mode: both; }
+  .rise { animation-name: rise; }
+  .leave { animation-name: leave; animation-duration: .16s; animation-timing-function: cubic-bezier(.7,0,.84,0); }
+  .pop { animation-name: pop; animation-duration: .32s; }
+  .ring-out { animation-name: ringout; animation-duration: .6s; }
+  .tint { animation-name: tint; animation-duration: .5s; }
+  .glow { animation-name: glow; animation-duration: .8s; }
+  .refill { animation-name: refill; animation-duration: .7s; }
+  .flash { animation-name: flash; animation-duration: .7s; }
+  .spin { animation: spin 1.6s linear infinite; }
+  .halo { opacity: 0; }
+  .tick { opacity: 0; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); filter: blur(1.5px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes leave { to { opacity: 0; transform: translateY(-5px); filter: blur(1.5px); } }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  @keyframes ringout { from { opacity: .7; transform: scale(1); } to { opacity: 0; transform: scale(3.2); } }
+  @keyframes tint { from { fill: var(--was); } }
+  @keyframes glow { 0% { filter: drop-shadow(0 0 0 var(--mid)); } 35% { filter: drop-shadow(0 0 3px var(--mid)); } 100% { filter: none; } }
+  @keyframes refill { from { stroke-dashoffset: var(--from); } to { stroke-dashoffset: var(--to); } }
+  @keyframes flash { 0% { opacity: .9; stroke-width: 3; } 100% { opacity: 0; stroke-width: 1.8; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes drain { from { stroke-dashoffset: var(--d0); } to { stroke-dashoffset: var(--d1); } }
+  @keyframes toLow { to { stroke: var(--mid); } }
+  @keyframes toBad { to { stroke: var(--bad); } }
+  @keyframes toLowF { to { fill: var(--mid); } }
+  @keyframes toBadF { to { fill: var(--bad); } }
+  @keyframes on { to { opacity: 1; } }
+  @keyframes off { to { opacity: 0; } }
+  @keyframes gone { to { visibility: hidden; } }
+  @keyframes halo { from { opacity: .5; transform: scale(1); } to { opacity: 0; transform: scale(3.4); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise, .leave, .pop, .ring-out { animation-name: fade; }
+    .leave { animation-direction: reverse; }
+    .spin, .halo { animation: none !important; }
+    .refill, .flash { animation-duration: .01s; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  }
+</style>
+<rect width="880" height="30" fill="var(--bg)"/>
+<g class=" m rise" style="animation-delay:0ms"><circle cx="14" cy="15" r="6" class="track-ring"/><circle cx="14" cy="15" r="6" class="ring" stroke="var(--mid)" stroke-dasharray="37.70" stroke-dashoffset="33.93" transform="rotate(-90 14 15)" style="--from:37.70;--to:33.93;--d0:33.93;--d1:37.70;animation:drain 360000ms linear 0ms forwards,toBad .4s ease 360000ms forwards"/><circle cx="14" cy="15" r="2" fill="var(--mid)" class="g" style="animation:pop .32s cubic-bezier(.16,1,.3,1) 0ms both,toBadF .4s ease 360000ms forwards"/><circle cx="14" cy="15" r="2" fill="var(--mid)" class="g halo" style="animation:halo 1.4s cubic-bezier(.16,1,.3,1) 0ms infinite,gone .01s linear 360000ms forwards"/></g>
+<g class=" m rise" style="animation-delay:0ms"><text x="26" y="19" class="num state tick" fill="var(--mid)" style="opacity:1;animation:off .01s linear 60000ms forwards">6m</text><text x="26" y="19" class="num state tick" fill="var(--mid)" style="animation:on .01s linear 60000ms forwards,off .01s linear 120000ms forwards">5m</text><text x="26" y="19" class="num state tick" fill="var(--mid)" style="animation:on .01s linear 120000ms forwards,off .01s linear 180000ms forwards">4m</text><text x="26" y="19" class="num state tick" fill="var(--mid)" style="animation:on .01s linear 180000ms forwards,off .01s linear 240000ms forwards">3m</text><text x="26" y="19" class="num state tick" fill="var(--mid)" style="animation:on .01s linear 240000ms forwards,off .01s linear 300000ms forwards">2m</text><text x="26" y="19" class="num state tick" fill="var(--mid)" style="animation:on .01s linear 300000ms forwards,off .01s linear 360000ms forwards">1m</text><text x="26" y="19" class="state tick" fill="var(--bad)" style="animation:on .01s linear 360000ms forwards">expired</text></g>
+<g class=" m rise" style="animation-delay:NaNms"><text x="63.6" y="19" class="label">ctx</text><rect x="88.4" y="13.5" width="18" height="3" rx="1.5" class="track"/><rect x="88.4" y="13.5" width="13.3" height="3" rx="1.5" class="g m-mid m glow" style="animation-delay:-40ms"/><text x="111.4" y="19" class="num">148.0k</text></g>
+<g class=" m rise" style="animation-delay:70ms"><text x="168.60000000000002" y="19" class="label">5h</text><rect x="186.8" y="13.5" width="18" height="3" rx="1.5" class="track"/><rect x="186.8" y="13.5" width="12.8" height="3" rx="1.5" class="g m-mid"/><text x="209.8" y="19" class="num">71%</text></g>
+<g class=" m rise" style="animation-delay:100ms"><text x="245.4" y="19" class="label">wk</text><rect x="263.6" y="13.5" width="18" height="3" rx="1.5" class="track"/><rect x="263.6" y="13.5" width="16.4" height="3" rx="1.5" class="g m-bad"/><text x="286.6" y="19" class="num">91%</text></g>
+<g class=" m rise" style="animation-delay:130ms"><text x="322.20000000000005" y="19" class="num dim">$0.21</text></g>
+<g class=" m rise" style="animation-delay:160ms"><rect x="366.20000000000005" y="8" width="62" height="14" fill="transparent"/><circle cx="373.20000000000005" cy="15" r="2.6" fill="var(--bad)" class="g m pop" style="animation-delay:0ms"/><circle cx="373.20000000000005" cy="15" r="2.6" class="g ripple m ring-out" stroke="var(--bad)" style="animation-delay:0ms"/><circle cx="373.20000000000005" cy="15" r="2.6" fill="var(--bad)" class="g halo"/><text x="380.20000000000005" y="19" class="label down">9router</text></g>
+<text x="442.20000000000005" y="19" class="next m rise" style="animation-delay:190ms">Next</text>
+
+<text x="476.20000000000005" y="19" class="task m rise" style="animation-delay:210ms">Write docs/specs/PLAN-2.md for the phase 2 screen slices</text>
+</svg>
