@@ -2,6 +2,8 @@
 
 ## 0.4.0
 
+- **`/skin monokai`**: a new built-in skin in the Monokai palette (green user lines, cyan reads, orange writes, yellow runs, purple searches, pink web and errors). It restyles the transcript's tool rows, diffs, tables and code cards; it does not change the app's window chrome.
+
 - **Monokai green theme.** Dark: Monokai's green, yellow, pink and cyan on `#272822`. Light: deeper versions of the same hues. The band and panel both use it (it was clay orange).
 - **Mods section in the Cockpit panel.** Press a button to open the agents panel, file tree or replay, set a skin, turn reflect on or off, or arm and stop keep-warm.
 - **New SVG header** in the panel (a prompt mark and the name), drawn from the palette. On the desktop only. It now carries the `xmlns` namespace, which the first SVG band was missing.

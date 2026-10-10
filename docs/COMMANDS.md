@@ -90,7 +90,7 @@ The guard applies when the context is at least 50,000 tokens and the cache has g
 | Command | Does |
 |---|---|
 | `/skin` | Opens the settings page. |
-| `/skin <name>` | Turns a skin on: `noir`, `tokyo-night`, `dracula`, `catppuccin`, `gruvbox`, `nord`, `mono`, or one you made. |
+| `/skin <name>` | Turns a skin on: `noir`, `tokyo-night`, `dracula`, `catppuccin`, `gruvbox`, `nord`, `mono`, `monokai`, or one you made. |
 | `/skin list`, `/skin gallery` | Lists skins; opens a pane showing every element. |
 | `/skin off` | Back to Claude Code's normal transcript. |
 | `/skin rail`, `tables`, `shimmer`, `band`, `clip`, `icons` | Switch one feature. Leave `band` off, because cockpit owns the band. |
