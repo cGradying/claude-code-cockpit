@@ -932,6 +932,8 @@ export const register: Register = (on, options) => {
   showReads = activity.includes('reads')
   showWrites = activity.includes('writes')
   followClaude = options?.follow !== 'off'
+  // cockpit patch: do not dock a sidebar by itself. /filetree opens it; autoOpen 'on' restores upstream's behaviour.
+  noDock = options?.autoOpen !== 'on'
   sizeDefault = options?.column === 'size'
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'filetree', description: 'Show the file tree; args: [path] (no path = cwd)' })

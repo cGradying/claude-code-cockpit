@@ -11,6 +11,7 @@ This is a vendored copy, kept as close to upstream as possible.
 ## Changes from upstream
 
 - hooks/replay-theater.mjs: the AbovePrompt hook now awaits `next(e)` and stacks its hint above what other plugins draw (it used to replace them).
+- hooks/replay-theater.mjs: magenta and cyan become the cockpit accent (#d97757), and the rounded border box around the pane and band is removed.
 
 ## Checks
 

@@ -34,23 +34,27 @@ return <Box flexDirection="column">{mine}{below}</Box>
 
 `cockpit` does this, and the vendored replay-theater, blast-radius and savvy-progress were patched to do it. The result is a stack: the cockpit row always on top, everything else only while it has something to say. Skins' own band is switched off by default so two usage bands never compete.
 
-## How the band is built
+## How the band and the panel are built
 
-The band is the part that took the most iterations, and each rule below exists because the alternative visibly went wrong.
+The first version drew the band as one SVG card, with a running countdown, entrance animations and memoised source text. In the real desktop app that card rendered blank, and it had caused every visual problem along the way: a white edge, a black flash, a width that shrank. It was deleted. The rule that replaced it: **draw with the app's own elements.**
 
-**On desktop it is one SVG card.** The desktop surface has no element for a ring or a meter, so the card is an `<svg>` drawn by `card()` in `cockpit/hooks/band.tsx`, next to a slot of native buttons. The terminal gets a plain two-line text version of the same data.
+**Native elements only.** `Box`, `Text` and `Button` take the app's fonts and theme, are crisp at any size, cannot flash, and truncate long text by themselves (`wrap="truncate-end"`), so there are no pixel-per-column guesses. The same tree serves the terminal and the desktop. The band went from 565 lines to under 250.
 
-**The card paints its own background.** The desktop draws an SVG inside a frame. A see-through card shows the frame's white backdrop. The card fills with the band's own colour (`#212121` dark, `#faf9f5` light) and declares `color-scheme: dark light`, so there is no white edge.
+**The band shows only what you glance at.** Cache countdown, context, the next task, and at most three buttons. Limits appear on the line only past 60%; cost, 9router status, What's next? and the shortcuts live in the panel. Showing exceptions instead of everything is what keeps one line calm.
 
-**The SVG text must stay identical between real changes.** The desktop discards and repaints the frame whenever the SVG source changes, which shows as a black flash. A countdown that rewrites the SVG every minute would flash every minute. So the countdown runs *inside* the SVG: the ring drains with a CSS animation sized to the time left, the amber and red turns are animations with delays, and each minute label (`42m`, `41m`, ...) is a pre-built element switched on and off at its own time. `cardOnce()` caches the SVG and its alt text and only rebuilds when something the card shows actually changes (a turn starts or ends, the task changes, a limit moves, 9router flips).
+**The panel has the room.** `/cockpit` or Details opens a pane, which the app shows as a tab in the side panel beside the conversation. Claude Code's mod API opens panes and cannot open free-floating windows (a hover card is clipped to the band), so a pane is the closest thing to a floating information window. Each block is a dim title over its numbers, with bars made of boxes.
 
-**Motion marks changes, not time.** `motionFor()` compares each drawing with the last and plays an entrance only for what changed: new task rises in while the old one lifts away, the ring refills with a flash after a turn re-caches the prompt, the 9router dot pops and ripples when it flips, the context bar glows once when you cross 70%. A redraw that changes nothing plays nothing. With Reduce Motion on, movement becomes fades and the spinner and pulses stop.
+**Bars are boxes, not characters.** A row of block characters showed seams, wrapped onto a second line, and drew the empty and full blocks at different widths. A bar is a full-width track `Box` with a filled `Box` inside it sized in percent. The engine only accepts whole percentages, so values are rounded. The track colour comes from the app theme (`config.list`).
 
-**Nothing beside the card may resize.** An earlier layout showed extra buttons on hover and hid the buttons during a turn; both changed the card's width, which rebuilt it. Now the card has a fixed width and the buttons live in a fixed-width slot. The project shortcuts swap in behind a More button instead of appearing on hover.
+**Sharing the band slot.** Most mods draw something above the prompt. A `ui.render` hook that returns without calling `next(e)` hides everything beneath it, so the pattern is `const below = await next(e)` and then `<Box column>{mine}{below}</Box>`. `cockpit` does this and the vendored replay-theater, blast-radius and savvy-progress were patched to.
 
-**A press's own work is dropped when the press ends.** Compact starts from a `clock.after` timer that returns the `/compact` run, so releasing the click does not cancel it. This pattern comes from claude-skins.
+**A press's own work is dropped when the press ends.** Compact starts from a `clock.after` timer that returns the `/compact` run, so releasing the click does not cancel it. The pattern comes from claude-skins.
 
-**State.** Values the drawing reads (`lastAt`, `next`, `router`, `quick`, `quickOpen`, `tick`) live in `$.state`, declared in `cockpit/types/index.d.ts`. The desktop drawing does not subscribe to `tick`, so the 30-second background check never redraws it.
+**State.** Values the drawing reads (`lastAt`, `next`, `tasks`, `router`, `quick`, `tick`) live in `$.state`, declared in `cockpit/types/index.d.ts`. A 30-second pulse updates `tick`, which redraws the countdown and checks 9router.
+
+**Rules the validator enforces** (they shaped the file layout): a plugin has one hooks module; `$` may only be passed to functions declared in the same file, never across an import, so each of `band.tsx` and `panel.tsx` declares its own small action functions and its own atoms; shared data and pure helpers live in `shared.ts`.
+
+**Look at the real thing.** Anything drawn is checked in the actual window, not only in tests: the engine's own messages in the transcript (for example "Box prop width must be a number or a percentage") are the fastest way to find a refused tree.
 
 ## The guards
 

@@ -10,11 +10,12 @@ This is a vendored copy, kept as close to upstream as possible.
 
 ## Changes from upstream
 
-- none. Copied unchanged (tests/ copied too; scripts/, .githooks/ and .github/ left out).
+- Copied with tests/; scripts/, .githooks/ and .github/ left out.
+- hooks/register.tsx and plugin.json: new `autoOpen` setting, default `off`, so the tree is docked only when you run /filetree (upstream docked it at session start). tests/surfaces.test.tsx: the upstream suite runs with `autoOpen: on`, plus one test for the default.
 
 ## Checks
 
-34 of 35 upstream tests pass; the one failure (`sidebar only: no pane in the default layout...`, a ui.close stub) fails identically on untouched upstream on this engine.
+35 of 36 tests pass (upstream's 35 plus one for the default); the one failure (`sidebar only: no pane in the default layout...`, a ui.close stub) fails identically on untouched upstream on this engine.
 
 ## Updating
 

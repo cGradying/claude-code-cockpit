@@ -7,9 +7,9 @@ declare module 'claude-code' {
       lastAt: number | null
       tick: number
       next: NextTask
+      tasks: string[]
       router: boolean | null
       quick: Quick[]
-      quickOpen: boolean
     }
   }
 }

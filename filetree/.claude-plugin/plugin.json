@@ -1,6 +1,6 @@
 {
   "name": "filetree",
-  "version": "0.2.24",
+  "version": "0.2.24+cockpit.1",
   "description": "An IDE-style file tree for Claude Code that shows what Claude is doing and where in files",
   "types": "./types/index.d.ts",
   "author": {
@@ -55,6 +55,16 @@
       "options": [
         "date",
         "size"
+      ]
+    },
+    "autoOpen": {
+      "type": "string",
+      "title": "Open at session start",
+      "description": "on docks the file tree in the sidebar by itself in a wide window (upstream's behaviour). off opens it only when you run /filetree.",
+      "default": "off",
+      "options": [
+        "off",
+        "on"
       ]
     }
   },

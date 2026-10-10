@@ -34,6 +34,7 @@ These mods run inside every Claude Code session, with your user's permissions an
 - On macOS it creates and deletes small marker files in the temp folder (`filetree-<session>-<n>.mark`) to detect which files a shell command changed. The names contain no file names from your project.
 - Reads, every 2 seconds, a theme file under `~/.local/state/omarchy/` if it exists (a Linux desktop convention); it is harmless and usually absent on macOS.
 - Passes the selected file's *path* (not contents) to Claude as context.
+- Docks itself only if you set `autoOpen` to `on`; otherwise it opens when you run `/filetree`.
 - **Worth knowing:** opening a file uses the OS default handler, so double-clicking a `.command`, `.app` or `.exe` in a repository would launch it.
 
 ### replay-theater

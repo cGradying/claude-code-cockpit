@@ -7,8 +7,10 @@
 cockpit/
   .claude-plugin/plugin.json        name, version, dependencies, types
   hooks/hooks.json                  { "modules": ["./register.tsx"] }
-  hooks/register.tsx                entry: calls band() and guards()
-  hooks/band.tsx                    the band
+  hooks/register.tsx                entry: calls band(), panel() and guards()
+  hooks/band.tsx                    the one-line band, /next, /cockpit
+  hooks/panel.tsx                   the Cockpit panel
+  hooks/shared.ts                   constants and pure helpers both use
   hooks/guards.ts                   co-author guard, key catcher, design nudge
   hooks/*.test.ts(x)                tests
   types/index.d.ts                  the $.state contract
@@ -27,7 +29,7 @@ claude plugin validate cockpit           # one plugin
 claude plugin test cockpit
 ```
 
-Expected results at the first release: cockpit 13 tests, cache-tax 59, reflect-mod 3, skins 58, filetree 34 of 35, and replay-theater, blast-radius and savvy-progress validate with no tests (upstream ships none). The one filetree failure (`sidebar only: no pane in the default layout...`) fails identically on untouched upstream.
+Expected results: cockpit 37 tests, cache-tax 59, reflect-mod 3, skins 58, filetree 35 of 36, and replay-theater, blast-radius and savvy-progress validate with no tests (upstream ships none). The one filetree failure (`sidebar only: no pane in the default layout...`) fails identically on untouched upstream.
 
 To try a plugin without installing it, start Claude Code with `claude --plugin-dir ./cockpit`.
 
@@ -54,4 +56,11 @@ You will hit these if you add code:
 
 - Check the real test suite, not only validation. `validate` passed on a cache-tax patch that had silently commented out half a state object; the upstream tests caught it.
 - Run upstream's tests against a patched copy and against untouched upstream. Failures that appear in both are not yours.
-- Anything that changes the SVG source text reloads the desktop frame. Keep the source stable and move time-dependent behaviour into CSS animation.
+- Look at the real window. A band that passed every test rendered blank in the desktop app. Capture the window (`screencapture -l <window id>` on macOS), read it, and read the engine's own messages in the transcript.
+- Prefer the app's own elements to a drawn picture. An embedded SVG frame caused a white edge, a black flash and a width that shrank; native `Box`, `Text` and `Button` have none of those.
+- Keep every label one string. JSX splits `{pct}%` into separate children, which breaks text search and screen readers.
+- A bar's width must be a whole percentage, or the engine refuses the whole tree.
+
+## Trying a change in the live app
+
+Hot reloading in a dev folder shows a change in the running desktop app. Copy `cockpit/` to `~/.claude/dev-mods/<session>/cockpit-dev`, rename the plugin and its state, pane id and command names so it does not clash with an installed copy, answer the hot-reload question once, and each turn's edits reload when the turn ends.

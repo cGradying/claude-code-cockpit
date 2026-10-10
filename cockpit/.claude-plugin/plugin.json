@@ -1,7 +1,7 @@
 {
   "name": "cockpit",
-  "version": "0.2.0",
-  "description": "A one-line band above the prompt (prompt-cache countdown, context, limits, cost, 9router, next task, Continue / What's next / Compact) plus guards: no Claude co-author trailers, pasted API keys held back, impeccable nudge on UI prompts.",
+  "version": "0.3.0",
+  "description": "A one-line band above the prompt and a roomy Cockpit panel (prompt-cache countdown, context, plan limits, cost, next tasks, shortcuts), plus guards: no Claude credit lines in shell commands, pasted API keys held back, impeccable nudge on UI prompts.",
   "author": {
     "name": "cGradying"
   },

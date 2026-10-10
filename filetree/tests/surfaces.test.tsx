@@ -117,7 +117,7 @@ async function texts(ui: any): Promise<string> {
 const STAMP = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/
 const NERD = /[\u{e000}-\u{f8ff}\u{f0000}-\u{fffff}]/u
 
-test('macOS Claude Code app: desktop pane draws, selects, opens with open', { timeoutMs: 20_000 }, async ($, on) => {
+test('macOS Claude Code app: desktop pane draws, selects, opens with open', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/Users/k/proj'
   const clock = world(on, {
@@ -151,7 +151,7 @@ test('macOS Claude Code app: desktop pane draws, selects, opens with open', { ti
   await ui.unmount()
 })
 
-test('macOS outside a repo: write scan uses find -newer marker, not GNU -newermt', { timeoutMs: 20_000 }, async ($, on) => {
+test('macOS outside a repo: write scan uses find -newer marker, not GNU -newermt', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/Users/k/scratch'
   const clock = world(on, { os: 'darwin', env: { HOME: '/Users/k' }, cwd: root, top: '', dirs: { [root]: [['a.ts', 'file']] }, status: '', numstat: '' }, ran)
@@ -165,7 +165,7 @@ test('macOS outside a repo: write scan uses find -newer marker, not GNU -newermt
   expect(find).not.toContain('-newermt')
 })
 
-test('Windows: backslash paths shimmer, open hands the path to PowerShell as data, no find, sh or cmd', { timeoutMs: 20_000 }, async ($, on) => {
+test('Windows: backslash paths shimmer, open hands the path to PowerShell as data, no find, sh or cmd', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = 'C:/Users/k/proj'
   const clock = world(on, {
@@ -194,7 +194,7 @@ test('Windows: backslash paths shimmer, open hands the path to PowerShell as dat
   await ui.unmount()
 })
 
-test('Linux unchanged: GNU find -newermt outside a repo, xdg-open detached', { timeoutMs: 20_000 }, async ($, on) => {
+test('Linux unchanged: GNU find -newermt outside a repo, xdg-open detached', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/scratch'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a\\b.txt', 'file'], ['c.txt', 'file']] }, status: '', numstat: '' }, ran)
@@ -217,7 +217,7 @@ test('Linux unchanged: GNU find -newermt outside a repo, xdg-open detached', { t
   await ui.unmount()
 })
 
-test('macOS app: every header button and the search box work on the desktop surface', { timeoutMs: 20_000 }, async ($, on) => {
+test('macOS app: every header button and the search box work on the desktop surface', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/Users/k/proj'
   const clock = world(on, {
@@ -251,7 +251,7 @@ test('macOS app: every header button and the search box work on the desktop surf
   await ui.unmount()
 })
 
-test('outside a repo only git rev-parse runs, never status, diff or ls-files', { timeoutMs: 20_000 }, async ($, on) => {
+test('outside a repo only git rev-parse runs, never status, diff or ls-files', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/scratch'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['c.txt', 'file']] }, status: '', numstat: '' }, ran)
@@ -265,7 +265,7 @@ test('outside a repo only git rev-parse runs, never status, diff or ls-files', {
   expect(gits.every(v => v === 'rev-parse')).toBe(true)
 })
 
-test('NotebookEdit refreshes git and lists the notebook folder', { timeoutMs: 20_000 }, async ($, on) => {
+test('NotebookEdit refreshes git and lists the notebook folder', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: root, dirs: { [root]: [['nb', 'dir']], [`${root}/nb`]: [['a.ipynb', 'file']] }, status: '## main\0 M nb/a.ipynb\0', numstat: '4\t2\tnb/a.ipynb\0' }, ran)
@@ -283,7 +283,7 @@ test('NotebookEdit refreshes git and lists the notebook folder', { timeoutMs: 20
   await ui.unmount()
 })
 
-test('long trees scroll: wheel, scrollbar drag, and a click does not jump the view', { timeoutMs: 20_000 }, async ($, on) => {
+test('long trees scroll: wheel, scrollbar drag, and a click does not jump the view', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/big'
   const names = Array.from({ length: 60 }, (_, i) => [`f${String(i).padStart(2, '0')}.txt`, 'file'] as [string, 'file'])
@@ -331,7 +331,7 @@ async function scrolledTree($: any, on: any) {
   return { root, clock, ui, ids }
 }
 
-test('follow on: the tree scrolls to the file Claude reads', { timeoutMs: 20_000 }, async ($, on) => {
+test('follow on: the tree scrolls to the file Claude reads', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const { root, clock, ui, ids } = await scrolledTree($, on)
   await $.tool.call({ tool: 'Read', file_path: `${root}/f55.txt` } as any)
   await clock.settle()
@@ -340,7 +340,7 @@ test('follow on: the tree scrolls to the file Claude reads', { timeoutMs: 20_000
   await ui.unmount()
 })
 
-test('follow off: reads, writes and folders Claude opens above the view never move it', { timeoutMs: 20_000, options: { follow: 'off' } }, async ($, on) => {
+test('follow off: reads, writes and folders Claude opens above the view never move it', { timeoutMs: 20_000, options: { autoOpen: 'on', follow: 'off' } }, async ($, on) => {
   const { root, clock, ui, ids } = await scrolledTree($, on)
   await $.tool.call({ tool: 'Read', file_path: `${root}/f55.txt` } as any)
   await clock.settle()
@@ -362,7 +362,7 @@ test('follow off: reads, writes and folders Claude opens above the view never mo
   await ui.unmount()
 })
 
-test('watches only git metadata, copies paths, clears search, Home and End', { timeoutMs: 20_000 }, async ($, on) => {
+test('watches only git metadata, copies paths, clears search, Home and End', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: root, dirs: { [root]: [['.git', 'dir'], ['a.txt', 'file'], ['b.txt', 'file'], ['c.txt', 'file']], [`${root}/.git`]: [['index', 'file'], ['HEAD', 'file']] }, status: '## main\0', numstat: '' }, ran)
@@ -403,7 +403,7 @@ test('watches only git metadata, copies paths, clears search, Home and End', { t
   await ui.unmount()
 })
 
-test('sidebar only: no pane in the default layout, and an inline pane closes itself', { timeoutMs: 20_000 }, async ($, on) => {
+test('sidebar only: no pane in the default layout, and an inline pane closes itself', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a.txt', 'file']] }, status: '', numstat: '' }, ran)
@@ -428,7 +428,7 @@ test('sidebar only: no pane in the default layout, and an inline pane closes its
 const shimmer = (name: string, tone: string) => `"t":${JSON.stringify(name)},"sh":"${tone}"`
 const fullscreen = (args: string) => ({ command: 'filetree', args, origin: { kind: 'person' }, presentation: { isFullscreen: true, columns: 200 } }) as any
 
-test('after /clear the tree rebuilds itself, keeps a pinned folder, and an empty root never loops', { timeoutMs: 20_000 }, async ($, on) => {
+test('after /clear the tree rebuilds itself, keeps a pinned folder, and an empty root never loops', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a.ts', 'file'], ['sub', 'dir']], [`${root}/sub`]: [['b.ts', 'file']] }, status: '', numstat: '' }, ran)
@@ -451,7 +451,7 @@ test('after /clear the tree rebuilds itself, keeps a pinned folder, and an empty
   await ui.unmount()
 })
 
-test('opener failures show a toast instead of failing silently', { timeoutMs: 20_000 }, async ($, on) => {
+test('opener failures show a toast instead of failing silently', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/Users/k/proj'
   const clock = world(on, { os: 'darwin', env: { HOME: '/Users/k' }, cwd: root, top: '', dirs: { [root]: [['a.xyz', 'file']] }, status: '', numstat: '', exits: { open: [1, 'No application knows how to open a.xyz\n'] } }, ran)
@@ -466,7 +466,7 @@ test('opener failures show a toast instead of failing silently', { timeoutMs: 20
   await ui.unmount()
 })
 
-test('an older directory listing never overwrites a newer one', { timeoutMs: 20_000 }, async ($, on) => {
+test('an older directory listing never overwrites a newer one', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/scratch'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['old.txt', 'file']] }, status: '', numstat: '', delays: {} }
@@ -487,7 +487,7 @@ test('an older directory listing never overwrites a newer one', { timeoutMs: 20_
   await ui.unmount()
 })
 
-test('a listing error keeps the cached rows and says so', { timeoutMs: 20_000 }, async ($, on) => {
+test('a listing error keeps the cached rows and says so', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/scratch'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a.txt', 'file']] }, status: '', numstat: '' }
@@ -516,7 +516,7 @@ test('replacing many folders in one batch keeps unchanged nodes and drops what v
   expect(out.find(n => n.id === '/r/b')?.loaded).toBe(true)
 })
 
-test('a cwd change moves the tree and drops the old selection before the next prompt', { timeoutMs: 20_000 }, async ($, on) => {
+test('a cwd change moves the tree and drops the old selection before the next prompt', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const a = '/home/k/repo-a'
   const b = '/home/k/repo-b'
@@ -541,7 +541,7 @@ test('a cwd change moves the tree and drops the old selection before the next pr
   await ui.unmount()
 })
 
-test('a background git push stays running until its task notification arrives', { timeoutMs: 20_000 }, async ($, on) => {
+test('a background git push stays running until its task notification arrives', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, {
@@ -566,7 +566,7 @@ test('a background git push stays running until its task notification arrives', 
   await ui.unmount()
 })
 
-test('a failed Bash command still refreshes what it changed before failing', { timeoutMs: 20_000 }, async ($, on) => {
+test('a failed Bash command still refreshes what it changed before failing', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: root, dirs: { [root]: [['a.txt', 'file'], ['b.txt', 'file']] }, status: '## main\0', numstat: '', tool: () => ({ isError: true, result: 'Exit code 1' }) }
@@ -584,7 +584,7 @@ test('a failed Bash command still refreshes what it changed before failing', { t
   await ui.unmount()
 })
 
-test('git activity is only certified by evidence: HEAD for commits, the exit code only for plain && chains', { timeoutMs: 20_000 }, async ($, on) => {
+test('git activity is only certified by evidence: HEAD for commits, the exit code only for plain && chains', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: root, dirs: { [root]: [['a.txt', 'file']] }, status: '## main\0', numstat: '', heads: ['abc1234def0'] }
@@ -613,7 +613,7 @@ test('git activity is only certified by evidence: HEAD for commits, the exit cod
   await ui.unmount()
 })
 
-test('unknown git verbs count as writers and read-only commands skip git work', { timeoutMs: 20_000 }, async ($, on) => {
+test('unknown git verbs count as writers and read-only commands skip git work', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: root, dirs: { [root]: [['README.md', 'file'], ['gone.txt', 'file']] }, status: '## main\0', numstat: '' }
@@ -638,7 +638,7 @@ test('unknown git verbs count as writers and read-only commands skip git work', 
   await ui.unmount()
 })
 
-test('search matches relative paths, and a refresh or a click in the tree picks up files added since the index was built', { timeoutMs: 20_000 }, async ($, on) => {
+test('search matches relative paths, and a refresh or a click in the tree picks up files added since the index was built', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: root, dirs: { [root]: [['src', 'dir'], ['alpha.txt', 'file']], [`${root}/src`]: [['a.ts', 'file']] }, status: '## main\0', numstat: '' }
@@ -666,7 +666,7 @@ test('search matches relative paths, and a refresh or a click in the tree picks 
   await ui.unmount()
 })
 
-test('a pinned path with dot segments resolves to the same folder', { timeoutMs: 20_000 }, async ($, on) => {
+test('a pinned path with dot segments resolves to the same folder', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: '/home/k', top: '', dirs: { [root]: [['a.ts', 'file']], [`${root}/src`]: [] }, status: '', numstat: '' }, ran)
@@ -676,7 +676,7 @@ test('a pinned path with dot segments resolves to the same folder', { timeoutMs:
   expect(JSON.stringify(r)).toContain('File tree on ~/proj.')
 })
 
-test('a written file whose name holds a newline still shimmers', { timeoutMs: 20_000 }, async ($, on) => {
+test('a written file whose name holds a newline still shimmers', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/scratch'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a\nb.ts', 'file'], ['c.txt', 'file']] }, status: '', numstat: '', find: `${root}/a\nb.ts\0` }, ran)
@@ -690,7 +690,7 @@ test('a written file whose name holds a newline still shimmers', { timeoutMs: 20
   await ui.unmount()
 })
 
-test('the pane takes its background from the Omarchy theme and follows a theme switch', { timeoutMs: 20_000 }, async ($, on) => {
+test('the pane takes its background from the Omarchy theme and follows a theme switch', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const w: World = { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a.ts', 'file']] }, status: '', numstat: '', theme: { toml: 'background = "#1e1e2e"\ndark_background = "#161622"\n', mtimeMs: 1 } }
@@ -709,7 +709,7 @@ test('the pane takes its background from the Omarchy theme and follows a theme s
   await ui.unmount()
 })
 
-test('without an Omarchy theme the pane keeps the terminal background and nothing polls', { timeoutMs: 20_000 }, async ($, on) => {
+test('without an Omarchy theme the pane keeps the terminal background and nothing polls', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, { os: 'linux', env: { HOME: '/home/k' }, cwd: root, top: '', dirs: { [root]: [['a.ts', 'file']] }, status: '', numstat: '' }, ran)
@@ -734,7 +734,7 @@ test('formatSize: bytes, binary units, one decimal under 100, ? for unknown', as
   expect(formatSize(-1)).toBe('?')
 })
 
-test('size column: the toggle swaps dates for sizes, folders are sized with du, an edit re-sizes its folders', { timeoutMs: 20_000 }, async ($, on) => {
+test('size column: the toggle swaps dates for sizes, folders are sized with du, an edit re-sizes its folders', { timeoutMs: 20_000, options: { autoOpen: 'on' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, {
@@ -768,7 +768,7 @@ test('size column: the toggle swaps dates for sizes, folders are sized with du, 
   await ui.unmount()
 })
 
-test('size column on Windows sums file sizes with fs.list instead of du', { timeoutMs: 20_000, options: { column: 'size' } }, async ($, on) => {
+test('size column on Windows sums file sizes with fs.list instead of du', { timeoutMs: 20_000, options: { autoOpen: 'on', column: 'size' } }, async ($, on) => {
   const ran: Ran = []
   const root = 'C:/Users/k/proj'
   const clock = world(on, {
@@ -785,7 +785,7 @@ test('size column on Windows sums file sizes with fs.list instead of du', { time
   await ui.unmount()
 })
 
-test('a folder whose size job goes stale mid-run is sized again instead of waiting forever', { timeoutMs: 20_000, options: { column: 'size' } }, async ($, on) => {
+test('a folder whose size job goes stale mid-run is sized again instead of waiting forever', { timeoutMs: 20_000, options: { autoOpen: 'on', column: 'size' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/home/k/proj'
   const clock = world(on, {
@@ -807,7 +807,7 @@ test('a folder whose size job goes stale mid-run is sized again instead of waiti
   await ui.unmount()
 })
 
-test('on Windows a folder size does not walk into linked folders, like du', { timeoutMs: 20_000, options: { column: 'size' } }, async ($, on) => {
+test('on Windows a folder size does not walk into linked folders, like du', { timeoutMs: 20_000, options: { autoOpen: 'on', column: 'size' } }, async ($, on) => {
   const ran: Ran = []
   const root = 'C:/Users/k/proj'
   const clock = world(on, {
@@ -846,3 +846,20 @@ for (const os of ['linux', 'win32'] as const) {
     await ui.unmount()
   })
 }
+
+// cockpit patch: the tree is not docked by itself unless autoOpen is on.
+test('by default no pane is docked at session start, and /filetree opens one', { timeoutMs: 20_000 }, async ($, on) => {
+  const ran: Ran = []
+  const root = '/Users/k/proj'
+  const clock = world(on, {
+    os: 'darwin', env: { HOME: '/Users/k', TMPDIR: '/var/folders/x/T/' }, cwd: root, top: root,
+    dirs: { [root]: [['a.ts', 'file']] }, status: '## main\0', numstat: '',
+  }, ran)
+  const before = opens.length
+  await $.session.start({ cwd: root, surface: 'desktop', isInteractive: true })
+  await clock.settle()
+  expect(opens.length).toBe(before)
+  await $.command.run({ command: 'filetree', args: '', origin: { kind: 'person' }, presentation: { isFullscreen: true, columns: 200 } } as any)
+  await clock.settle()
+  expect(opens.length).toBeGreaterThan(before)
+})

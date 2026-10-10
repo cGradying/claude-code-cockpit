@@ -6,6 +6,8 @@
 //
 // Claude Code 2.1.280 function hooks. Load with --plugin-dir.
 
+// cockpit patch: the cockpit accent, instead of magenta and cyan, and no border box.
+const CLAY = "#d97757";
 const PANE_ID = "replay-theater";
 const MAX_DIFF_LINES = 12;
 const MAX_LCS_LINES = 400;
@@ -145,7 +147,7 @@ function replayView($, e, inBand) {
 
     // The step list: one cell per step, the current one highlighted.
     const strip = state.replay.map((s, n) =>
-      Text({ key: `s${n}`, inverse: n === k, color: n === k ? "cyan" : undefined, dimColor: n !== k, children: ` ${n + 1} ` }));
+      Text({ key: `s${n}`, inverse: n === k, color: n === k ? CLAY : undefined, dimColor: n !== k, children: ` ${n + 1} ` }));
 
     const go = (to) => { state.index = Math.max(0, Math.min(to, total - 1)); $.ui.invalidate("ui.render"); };
     const close = () => {
@@ -156,14 +158,14 @@ function replayView($, e, inBand) {
     };
 
     return Box({
-      flexDirection: "column", borderStyle: "round", borderColor: "magenta", paddingX: 1,
+      flexDirection: "column", paddingX: 1,
       children: [
         Box({ flexDirection: "row", justifyContent: "space-between", children: [
-          Text({ bold: true, color: "magenta", children: "▶ Replay Theater" }),
+          Text({ bold: true, color: CLAY, children: "▶ Replay Theater" }),
           Text({ bold: true, children: `step ${k + 1} of ${total}` }),
         ] }),
         Box({ flexDirection: "row", children: strip }),
-        Text({ bold: true, color: "cyan", wrap: "truncate-start", children: step.file }),
+        Text({ bold: true, wrap: "truncate-start", children: step.file }),
         Box({ flexDirection: "row", gap: 2, children: [
           Text({ dimColor: true, children: `${step.tool}${step.note ? " · " + step.note : ""}` }),
           Text({ color: "green", children: `+${add}` }),
@@ -231,7 +233,7 @@ export function register(on, options) {
     return stack(Box({
       flexDirection: "row", gap: 2, paddingX: 1,
       children: [
-        Text({ color: "magenta", bold: true, children: hintText() }),
+        Text({ color: CLAY, bold: true, children: hintText() }),
         Button({ key: "open-replay", label: "Replay", hotkey: "r", onPress: () => openReplay($) }),
       ],
     }));

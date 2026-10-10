@@ -4,20 +4,21 @@ Everything you can type or press once the bundle is installed. Inside Claude Cod
 
 ## The band (cockpit)
 
-A single line above the prompt:
+A single line above the prompt, drawn with Claude's own text and buttons:
 
 ```
-◔ 42m  ctx ▬ 72.5k  5h ▬ 10%  wk ▬ 59%  $0.21  ●  Next  Write docs/specs/PLAN-2.md…
+◔ 42m   ctx 72.5k   Next  Write docs/specs/PLAN-2.md…                       Continue   Details
 ```
 
 | Part | Meaning |
 |---|---|
-| Ring and minutes | Time left on the one-hour prompt cache. Green above 10 minutes, amber below, red once expired. The ring drains on its own; it needs no redraw. While a turn runs it becomes a spinner and says `working`. |
-| `ctx` | Context tokens in the live window, with a small bar for how full it is. |
-| `5h`, `wk` | Percent of the 5-hour and weekly plan limits used, when your plan reports them. Bars turn amber from 60% and red from 85%. |
-| `$0.21` | Session cost so far. |
-| Dot | 9router health (`http://127.0.0.1:20128/v1/models`, checked every 30 seconds). Hidden until it has answered once, so it never shows if you do not use 9router. Turns into a red "9router" label when it stops answering. |
-| `Next` | The first open task in the project's `.claude/NEXT.md`. |
+| `◔ 42m` | Time left on the one-hour prompt cache. The pie shows how much of the hour remains. Green above 10 minutes, amber below, red once `expired` or `cold`. While a turn runs it says `✻ working`. |
+| `ctx 72.5k` | Context tokens in the live window. From 60% it adds the percent and turns amber, then red from 85%. |
+| `5h`, `wk` | Plan limits. Hidden until they pass 60%; the panel always shows them. |
+| `9router down` | Shown only if 9router (`http://127.0.0.1:20128/v1/models`, checked every 30 seconds) answered once and then stopped. Never shown if you do not use 9router. |
+| `Next` | The first open task in the project's `.claude/NEXT.md`. Truncated with an ellipsis by the app when the window is narrow. |
+
+In a window narrower than about 72 columns the stats move to their own line above the task and buttons.
 
 ### Buttons
 
@@ -25,16 +26,26 @@ Click, or focus the band with `ctrl+x` then `tab` and press the key.
 
 | Button | Key | Does |
 |---|---|---|
-| Continue | `c` | Sends "Continue with the next task: ...", and asks Claude to check it off in `NEXT.md` and add follow-ups. Only shown when a task exists. |
-| What's next? | `n` | Asks Claude to read the project's plan, recent commits and open PRs and write the next three tasks as `- [ ]` lines at the top of `NEXT.md`. It is told not to start them. |
-| More / Back | `m` | Swaps the project shortcuts into the same slot (keys `1` to `3`, up to four). Only shown when the project has shortcuts. |
-| Compact | `k` | Shown at 70% context or more. Runs `/compact` with instructions to keep the plan, open tasks, open PRs, decisions and unresolved bugs. It starts from a timer so releasing the click does not cancel it. |
+| Continue | `c` | Sends "Continue with the next task: ...", and asks Claude to check it off in `NEXT.md` and add follow-ups. Only shown when a task exists and no turn is running. |
+| Details | `d` | Opens the Cockpit panel. |
+| Compact | `k` | Shown at 70% context or more, and not while a turn runs. Runs `/compact` with instructions to keep the plan, open tasks, open PRs, decisions and unresolved bugs. It starts from a timer so releasing the click does not cancel it. |
 
-The buttons hide while a turn runs. Pressing the same button twice within 10 seconds sends once.
+Pressing the same button twice within 10 seconds sends once. After each finished turn the "continue" prompt also appears as the dim suggestion in the prompt box, so `Tab` then `Enter` sends it. At 70% context you also get a one-time toast.
 
-After each finished turn the "continue" prompt also appears as the dim suggestion in the prompt box, so `Tab` then `Enter` sends it.
+### `/cockpit`
 
-At 70% context you also get a one-time toast.
+Opens the Cockpit panel, a tab in the side panel next to the conversation.
+
+| Block | Shows |
+|---|---|
+| Prompt cache | Time left (`42m left of 1 hour`), a bar, and a note: it refreshes after every answer, or the next message re-writes the context at full price once it has lapsed. |
+| Context | Tokens, percent and window size (`684.5k tokens · 68% of 1M`), a bar, and a Compact button (primary from 70%). |
+| Plan limits | The 5-hour and weekly limits, each with its percent, a bar and how long until it resets. |
+| This session | Cost so far, and whether 9router is running (only if it has answered once). |
+| Next up | The next five open tasks from `NEXT.md`, with Continue (`c`) and What's next? (`n`). What's next? asks Claude to read the plan, recent commits and open PRs and write the next three tasks as `- [ ]` lines at the top of `NEXT.md`, without starting them. |
+| Shortcuts | This project's shortcut buttons, `1` to `3` (up to four). |
+
+Bars are solid boxes sized in whole percents, and the empty part follows the app's light or dark theme.
 
 ### `/next`
 
@@ -88,7 +99,7 @@ The `skin-designer` skill lets Claude design a skin with you through the `mcp__s
 
 ## filetree
 
-`/filetree [path]` shows the file tree in the right sidebar (the current folder, or the path you give). It needs the fullscreen layout (`/tui fullscreen`) and a window at least 110 columns wide. It may also dock itself at session start in a wide window. Files Claude reads show purple, writes orange, commits green. The selected file is passed to Claude as context (path only, never contents).
+`/filetree [path]` shows the file tree in the right sidebar (the current folder, or the path you give). It needs the fullscreen layout (`/tui fullscreen`) and a window at least 110 columns wide. It does not dock by itself unless you set `autoOpen` to `on`. Files Claude reads show purple, writes orange, commits green. The selected file is passed to Claude as context (path only, never contents).
 
 ## replay-theater
 

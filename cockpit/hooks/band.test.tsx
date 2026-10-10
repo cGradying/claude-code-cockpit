@@ -1,13 +1,19 @@
 import type { On } from 'claude-code'
 import { expect, mock, test } from 'claude-code/testing'
+import type { Engine } from 'claude-code/testing'
 
 const ROOT = '/work/IntPortal/.claude/worktrees/some-branch'
 const NEXT = '/work/IntPortal/.claude/NEXT.md'
 const PROPS = { hasSurvey: false, isWorking: false, maxRows: 20, bodyColumns: 120 } as never
+const PANE_PROPS = { title: 'Cockpit', isFocused: false, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 40 }, view: {} } as never
+const RESET = new Date(1_000_000 + (2 * 60 + 10) * 60_000).toISOString() // 2h 10m after the mocked clock
 
-function engine(on: On, pct: number) {
+type Opts = { five?: number; week?: number; router?: boolean; tasks?: string }
+
+function engine(on: On, pct: number, opts: Opts = {}) {
   const sent: string[] = []
   const commands: string[] = []
+  const opened: string[] = []
   const clock = mock.clock(on, { now: 1_000_000 } as never)
   on('session.root', () => ({ value: ROOT }))
   // another plugin's band, drawn beneath ours
@@ -15,12 +21,15 @@ function engine(on: On, pct: number) {
   on('session.usage', () => ({ value: {
     startedAt: 0,
     context: { tokens: 72_500, window: 200_000, percent: pct },
-    rateLimits: [{ kind: 'five_hour', percentUsed: 10 }, { kind: 'seven_day', percentUsed: 59 }],
+    rateLimits: [
+      { kind: 'five_hour', percentUsed: opts.five ?? 10, resetsAt: RESET },
+      { kind: 'seven_day', percentUsed: opts.week ?? 59 },
+    ],
     cost: { usd: 0.21 },
   } }) as never)
   on('fs.exists', (_, e) => ({ value: JSON.stringify(e).includes(NEXT) }))
-  on('fs.read', () => ({ value: '- [x] F1 tokens\n- [ ] Write PLAN-2.md\n- [ ] Later thing\n' }))
-  on('http.fetch', () => ({ value: { status: 200, ok: true, headers: {}, text: '{}' } }))
+  on('fs.read', () => ({ value: opts.tasks ?? '- [x] F1 tokens\n- [ ] Write PLAN-2.md\n- [ ] Later thing\n' }))
+  on('http.fetch', () => ({ value: { status: opts.router === false ? 503 : 200, ok: opts.router !== false, headers: {}, text: '{}' } }))
   on('command.register', (_, e) => ({ value: { command: e.name } }) as never)
   on('command.run', (_, e) => {
     commands.push(`${e.command} ${e.args}`)
@@ -31,77 +40,188 @@ function engine(on: On, pct: number) {
     return { text: e.text }
   })
   on('prompt.suggest', () => ({ isShown: true }) as never)
-  return { sent, commands, clock }
+  on('ui.open', (_, e) => {
+    opened.push((e as unknown as { id: string }).id)
+    return { value: { isPlaced: true } } as never
+  })
+  return { sent, commands, opened, clock }
 }
 
+const start = async ($: Engine, seconds?: number) =>
+  $.session.start({ cwd: ROOT, source: 'startup', ...(seconds === undefined ? {} : { seconds_since_last_response: seconds }) } as never).catch(() => undefined)
+const band = ($: Engine, surface: 'terminal' | 'desktop', over: object = {}) =>
+  $.ui.mount({ plugin: 'cockpit', surface, component: 'AbovePrompt', props: { ...(PROPS as object), ...over } as never })
+const panel = ($: Engine, surface: 'terminal' | 'desktop') =>
+  $.ui.mount({ plugin: 'cockpit', surface, component: 'Pane', requestId: 'cockpit', props: PANE_PROPS })
+const text = async (ui: { drawn: () => Promise<unknown> }) => JSON.stringify(await ui.drawn())
+
 for (const surface of ['terminal', 'desktop'] as const) {
-  test(`${surface}: shows the next task and Continue sends it`, async ($, on) => {
+  test(`${surface} band: one native row, only what you glance at`, async ($, on) => {
     const { sent, clock } = engine(on, 30)
-    await $.session.start({ cwd: ROOT, source: 'startup' } as never).catch(() => undefined)
+    await start($, 60)
     await clock.settle()
-    const ui = await $.ui.mount({ plugin: 'cockpit', surface, component: 'AbovePrompt', props: PROPS })
+    const ui = await band($, surface)
+    const tree = await text(ui)
 
-    expect(await ui.find({ key: 'continue' })).toBeDefined()
+    expect(tree).toContain('Write PLAN-2.md') // plain text, so the app truncates it itself
+    expect(tree).toContain('72.5k')
+    expect(tree).toContain('below-plugin') // another plugin's band sits beneath ours
+    expect(tree).not.toContain('"type":"Svg"')
+    expect(tree).not.toContain('59%') // limits below 60% stay in the panel
+    expect(tree).not.toContain('0.21') // so does the cost
     expect(await ui.find({ key: 'compact' })).toBeUndefined()
-    expect(JSON.stringify(await ui.drawn())).toContain('below-plugin')
-    expect(JSON.stringify(await ui.drawn())).toContain('9router')
-    expect(JSON.stringify(await ui.drawn())).toContain('Write PLAN-2.md')
-    // terminal: continue, plan, 3 shortcuts; desktop: continue, plan, More (shortcuts swap in behind it)
-    expect(await ui.findAll({ type: 'Button' })).toHaveLength(surface === 'terminal' ? 5 : 3)
+    expect(await ui.findAll({ type: 'Button' })).toHaveLength(2) // continue, details
 
     await ui.press({ key: 'continue' })
     await ui.press({ key: 'continue' })
-    expect(sent).toHaveLength(1)
+    expect(sent).toHaveLength(1) // a double press sends once
     expect(sent[0]).toContain('Write PLAN-2.md')
     expect(sent[0]).toContain(NEXT)
-
-    if (surface === 'desktop') {
-      await ui.press({ key: 'more' })
-      expect(await ui.find({ key: 'continue' })).toBeUndefined()
-      expect(await ui.find({ key: 'back' })).toBeDefined()
-    }
-    await ui.press({ key: 'quick-1' })
-    expect(sent[1]).toContain('iOS Simulator')
   })
 
-  test(`${surface}: a quiet minute redraws without a new SVG`, async ($, on) => {
-    const { clock } = engine(on, 30)
-    await $.session.start({ cwd: ROOT, source: 'startup', seconds_since_last_response: 60 } as never).catch(() => undefined)
+  test(`${surface} band: a limit appears on the line once it passes 60%`, async ($, on) => {
+    const { clock } = engine(on, 30, { five: 71, week: 91 })
+    await start($)
     await clock.settle()
-    const ui = await $.ui.mount({ plugin: 'cockpit', surface, component: 'AbovePrompt', props: PROPS })
-    const source = async () => JSON.stringify(await ui.findAll({ type: 'Svg' }))
-    const before = await source()
-    await clock.advance(61_000)
-    await ui.redraw()
-    const after = await source()
-    expect(after).toBe(before)
-    expect(JSON.stringify(await ui.drawn())).not.toContain('<title>')
+    const tree = await text(await band($, surface))
+    expect(tree).toContain('71%')
+    expect(tree).toContain('91%')
   })
 
-  test(`${surface}: the card keeps its size when a turn starts`, async ($, on) => {
-    if (surface === 'terminal') return
-    const { clock } = engine(on, 30)
-    await $.session.start({ cwd: ROOT, source: 'startup' } as never).catch(() => undefined)
+  test(`${surface} band: Details opens the cockpit panel`, async ($, on) => {
+    const { opened, clock } = engine(on, 30)
+    await start($)
     await clock.settle()
-    const ui = await $.ui.mount({ plugin: 'cockpit', surface, component: 'AbovePrompt', props: PROPS })
-    const widths = async () => {
-      const tree = JSON.stringify(await ui.drawn())
-      return [...tree.matchAll(/"width":(\d+)/g)].map(m => m[1]).join(',')
-    }
-    const idle = await widths()
-    expect(idle.split(",").length).toBeGreaterThan(2)
-    await ui.redraw({ ...(PROPS as object), isWorking: true } as never)
-    expect(await widths()).toBe(idle)
+    const ui = await band($, surface)
+    await ui.press({ key: 'details' })
+    expect(opened).toEqual(['cockpit'])
   })
 
-  test(`${surface}: offers Compact past 70% and keeps the plan`, async ($, on) => {
+  test(`${surface}: /cockpit opens the panel`, async ($, on) => {
+    const { opened, clock } = engine(on, 30)
+    await start($)
+    await clock.settle()
+    const r = await $.command.run({ command: 'cockpit', args: '', origin: { kind: 'person' }, presentation: { isFullscreen: false, columns: 120 } } as never)
+    expect(JSON.stringify(r)).toContain('opened')
+    expect(opened).toEqual(['cockpit'])
+  })
+
+  test(`${surface} band: the cache label counts down from the last response`, async ($, on) => {
+    const { clock } = engine(on, 30)
+    await start($, 18 * 60) // last answered 18 minutes ago
+    await clock.settle()
+    expect(await text(await band($, surface))).toContain('42m')
+  })
+
+  test(`${surface} band: an expired cache says so`, async ($, on) => {
+    const { clock } = engine(on, 30)
+    await start($, 90 * 60)
+    await clock.settle()
+    expect(await text(await band($, surface))).toContain('expired')
+  })
+
+  test(`${surface} band: 9router shows only once it has answered and then stops`, async ($, on) => {
+    const { clock } = engine(on, 30, { router: false })
+    await start($)
+    await clock.settle()
+    // never answered, so it stays hidden rather than crying wolf on a machine without 9router
+    expect(await text(await band($, surface))).not.toContain('9router')
+  })
+
+  test(`${surface} band: offers Compact past 70% and keeps the plan`, async ($, on) => {
     const { commands, clock } = engine(on, 82)
-    await $.session.start({ cwd: ROOT, source: 'startup' } as never).catch(() => undefined)
-    const ui = await $.ui.mount({ plugin: 'cockpit', surface, component: 'AbovePrompt', props: PROPS })
+    await start($)
+    await clock.settle()
+    const ui = await band($, surface)
 
+    expect(await text(ui)).toContain('82%')
     await ui.press({ key: 'compact' })
     expect(commands).toHaveLength(0) // started from a timer, not inside the press
     await clock.advance(10)
     expect(commands[0]).toContain('compact Keep the current plan')
+  })
+
+  test(`${surface} band: while a turn runs only Details stays, and the numbers`, async ($, on) => {
+    const { clock } = engine(on, 30)
+    await start($)
+    await clock.settle()
+    const ui = await band($, surface, { isWorking: true })
+    expect(await ui.findAll({ type: 'Button' })).toHaveLength(1)
+    expect(await text(ui)).toContain('working')
+    expect(await text(ui)).toContain('72.5k')
+  })
+
+  test(`${surface} band: a narrow window stacks the stats above the task`, async ($, on) => {
+    const { clock } = engine(on, 30)
+    await start($)
+    await clock.settle()
+    const wide = await text(await band($, surface, { bodyColumns: 140 }))
+    const narrow = await text(await band($, surface, { bodyColumns: 60 }))
+    expect(narrow).not.toBe(wide)
+    expect(narrow).toContain('Write PLAN-2.md')
+  })
+
+  test(`${surface} panel: every number with room, limits with their reset`, async ($, on) => {
+    const { clock } = engine(on, 36)
+    await start($, 18 * 60)
+    await clock.settle()
+    const tree = await text(await panel($, surface))
+
+    for (const word of ['Prompt cache', '42m left', 'Context', '72.5k tokens', '36%', '200k', '"width":"36%"', 'Plan limits', '5-hour limit', 'Weekly limit', 'resets in 2h 10m', '$0.21', 'Next up', 'Write PLAN-2.md', 'Later thing', 'Shortcuts', 'Rebuild']) {
+      expect(tree).toContain(word)
+    }
+    expect(tree).not.toContain('"type":"Svg"')
+  })
+
+  test(`${surface} panel: bar widths are whole percentages, which is all the app accepts`, async ($, on) => {
+    const { clock } = engine(on, 36.4)
+    await start($, 7) // answered seven seconds ago: 99.8% of the hour is left
+    await clock.settle()
+    const tree = await text(await panel($, surface))
+    const widths = [...tree.matchAll(/"width":"([^"]+)"/g)].map(m => m[1])
+    expect(widths.length).toBeGreaterThan(3)
+    for (const w of widths) expect(w).toMatch(/^\d+%$/)
+  })
+
+  test(`${surface} panel: the empty part of a bar follows the app theme`, async ($, on) => {
+    const { clock } = engine(on, 36)
+    on('config.list', () => ({ value: [{ key: 'theme', label: 'Theme', kind: 'choice', value: 'light', provider: { plugin: 'engine', tier: 'core' }, isLocked: false }] }) as never)
+    await start($)
+    await clock.settle()
+    expect(await text(await panel($, surface))).toContain('#e6e3dc')
+  })
+
+  test(`${surface} panel: dark by default`, async ($, on) => {
+    const { clock } = engine(on, 36)
+    await start($)
+    await clock.settle()
+    expect(await text(await panel($, surface))).toContain('#303030')
+  })
+
+  test(`${surface} panel: its buttons act`, async ($, on) => {
+    const { sent, commands, clock } = engine(on, 36)
+    await start($)
+    await clock.settle()
+    const ui = await panel($, surface)
+
+    await ui.press({ key: 'continue' })
+    expect(sent[0]).toContain('Write PLAN-2.md')
+    await ui.press({ key: 'plan' })
+    expect(sent[1]).toContain("What's next?")
+    await ui.press({ key: 'quick-1' })
+    expect(sent[2]).toContain('iOS Simulator')
+    await ui.press({ key: 'compact' })
+    await clock.advance(10)
+    expect(commands[0]).toContain('compact Keep the current plan')
+  })
+
+  test(`${surface} panel: an empty list says what to do`, async ($, on) => {
+    const { clock } = engine(on, 36, { tasks: '- [x] all done\n' })
+    await start($)
+    await clock.settle()
+    const ui = await panel($, surface)
+    expect(await text(ui)).toContain('Nothing queued')
+    expect(await ui.find({ key: 'continue' })).toBeUndefined()
+    expect(await ui.find({ key: 'plan' })).toBeDefined()
   })
 }
