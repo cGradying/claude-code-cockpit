@@ -63,4 +63,5 @@ These live in `cockpit/hooks/shared.ts`, `band.tsx` and `panel.tsx`. Change them
 - Compact appears at 70% context (`COMPACT_AT`).
 - The 9router address is `http://127.0.0.1:20128/v1/models` (`ROUTER_URL`).
 - The band moves its stats to their own line below 72 columns (`isNarrow` in `band.tsx`).
-- The panel's bar track colours (`TRACK_DARK`, `TRACK_LIGHT` in `panel.tsx`).
+- The colours: the Monokai green palette (`DARK`, `LIGHT` in `shared.ts`). Dark uses Monokai's own hues on `#272822`; light uses deeper versions of the same hues so they read on white.
+- The Mods list (`MODS` in `panel.tsx`): add a row with a name, a note and the commands its buttons run.

@@ -2,17 +2,20 @@ import { atom, read } from 'claude-code'
 import type { EngineInterface, On } from 'claude-code'
 
 import {
-  CLAY,
   COMPACT_AT,
   PANEL,
   TTL_MS,
   cacheTone,
   continueText,
   heat,
+  isLightTheme,
   nextFile,
+  palette,
   planText,
+  tint,
   until,
 } from './shared'
+import type { Palette, Tone } from './shared'
 
 // The same values the band keeps (same plugin and key, so the same state).
 const lastAt = atom({ plugin: 'cockpit', key: 'lastAt' } as const, null)
@@ -47,9 +50,51 @@ function compactNow($: EngineInterface, file: string) {
 // "1M", "200k": the context window as people say it.
 const windowLabel = (n: number) => (n >= 1_000_000 ? `${+(n / 1_000_000).toFixed(1)}M` : `${Math.round(n / 1000)}k`)
 
-// The empty part of a bar: a quiet neutral that follows the app's light or dark theme.
-const TRACK_DARK = '#303030'
-const TRACK_LIGHT = '#e6e3dc'
+// A mod's command, started from a timer so releasing the press does not cancel it.
+function runMod($: EngineInterface, command: string, args?: string) {
+  void $.clock.after(1, () =>
+    $.command
+      .run(args === undefined ? { command } : { command, args })
+      .catch((error: unknown) => $.ui.toast(`/${command} failed: ${error instanceof Error ? error.message : String(error)}`)),
+  )
+}
+
+// The mods this plugin bundles, each with the presses that drive it. Their state lives in their own
+// plugins and cannot be read from here, so a button names the action it does, never a state.
+const MODS: { name: string; note: string; actions: { label: string; command: string; args?: string }[] }[] = [
+  { name: 'Agents & progress', note: 'subagents, cost, flow progress', actions: [{ label: 'Open', command: 'agents-info' }] },
+  { name: 'File tree', note: 'sidebar with git status', actions: [{ label: 'Open', command: 'filetree' }] },
+  { name: 'Replay', note: 'step through the last edits', actions: [{ label: 'Open', command: 'replay' }] },
+  {
+    name: 'Skin',
+    note: 'transcript restyle',
+    actions: [
+      { label: 'Noir', command: 'skin', args: 'noir' },
+      { label: 'Off', command: 'skin', args: 'off' },
+    ],
+  },
+  { name: 'Reflect', note: 'catch corrections (uses Haiku)', actions: [{ label: 'On / off', command: 'reflect-pause' }] },
+  {
+    name: 'Keep-warm',
+    note: 'spends tokens every ~50 min',
+    actions: [
+      { label: 'Arm', command: 'keepwarm' },
+      { label: 'Stop', command: 'keepwarm', args: 'off' },
+    ],
+  },
+]
+
+// The mark and the name: a prompt in a rounded square, drawn here so it follows the palette.
+// Drawn as an image, so it needs the namespace; the surface's own text falls back where it has no Svg.
+const headerSvg = (p: Palette) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="52" viewBox="0 0 300 52">` +
+  `<rect x="1" y="6" width="40" height="40" rx="10" fill="${p.bg ?? '#f6f4ee'}" stroke="${p.accent}" stroke-width="2"/>` +
+  `<path d="M12 19 L22 26 L12 33" fill="none" stroke="${p.accent}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+  `<path d="M25 35 H33" stroke="${p.info}" stroke-width="3" stroke-linecap="round"/>` +
+  `<text x="54" y="29" font-family="SF Mono, Menlo, ui-monospace, monospace" font-size="22" font-weight="700" fill="${p.fg}">cockpit</text>` +
+  `<rect x="150" y="12" width="11" height="19" fill="${p.accent}"/>` +
+  `<text x="54" y="45" font-family="SF Mono, Menlo, ui-monospace, monospace" font-size="11" fill="${p.muted}">cache, context, limits, mods</text>` +
+  `</svg>`
 const LIMIT_NAMES: Record<string, string> = { five_hour: '5-hour limit', seven_day: 'Weekly limit' }
 
 // The roomy view: everything the band leaves out, in one place beside the conversation.
@@ -65,9 +110,9 @@ export function register(on: On) {
     const usage = await $.session.usage()
     const now = await $.clock.now()
     const file = nextFile(await $.session.root())
-    const { Box, Text, Button } = $.ui.resolve(e)
-    const theme = String((await $.config.list().catch(() => [])).find(r => r.key === 'theme')?.value ?? 'dark')
-    const track = theme.includes('light') ? TRACK_LIGHT : TRACK_DARK
+    const ui = $.ui.resolve(e)
+    const { Box, Text, Button } = ui
+    const pal = palette(isLightTheme(await $.config.list().catch(() => [])))
 
     const left = at === null ? null : TTL_MS - (now - at)
     const cache = cacheTone({ isWorking: false, left })
@@ -76,25 +121,31 @@ export function register(on: On) {
     // One labelled block; the title is dim and small so the numbers lead.
     const section = (title: string, children: unknown) => (
       <Box flexDirection="column">
-        <Text dimColor>{title}</Text>
+        <Text bold color={pal.muted}>{title}</Text>
         {children}
       </Box>
     )
     // A solid bar: a track and a filled part sized in percent, so it is always exactly as wide as the
     // panel and can never wrap or show seams the way a row of block characters does.
-    const meter = (pct: number, color?: string) => (
-      <Box width="100%" height={1} backgroundColor={track}>
-        <Box width={`${Math.max(0, Math.min(100, Math.round(pct)))}%`} height={1} backgroundColor={color ?? CLAY} />
+    const meter = (pct: number, tone?: Tone['color']) => (
+      <Box width="100%" height={1} backgroundColor={pal.track}>
+        <Box width={`${Math.max(0, Math.min(100, Math.round(pct)))}%`} height={1} backgroundColor={tint(tone, pal) ?? pal.accent} />
       </Box>
     )
 
     return (
-      <Box flexDirection="column" paddingX={2} paddingY={1} gap={1}>
+      <Box flexDirection="column" paddingX={2} paddingY={1} gap={1} flexGrow={1} backgroundColor={pal.bg}>
+        {'Svg' in ui ? (
+          <ui.Svg source={headerSvg(pal)} alt="cockpit" width={300} height={52} />
+        ) : (
+          <Text bold color={pal.accent}>cockpit</Text>
+        )}
+
         {section(
           'Prompt cache',
           <Box flexDirection="column">
             <Text>
-              <Text bold color={cache.color}>
+              <Text bold color={tint(cache.color, pal)}>
                 {`${cache.glyph} ${cache.label === 'expired' || cache.label === 'cold' ? cache.label : `${cache.label} left`}`}
               </Text>
               <Text dimColor>{` of ${TTL_MS / 3_600_000} hour`}</Text>
@@ -111,7 +162,7 @@ export function register(on: On) {
           <Box flexDirection="column">
             <Text>
               <Text bold>{usage.context.tokens === undefined ? 'no reading yet' : `${(usage.context.tokens / 1000).toFixed(1)}k tokens`}</Text>
-              {ctxPct !== undefined && <Text color={heat(ctxPct)}>{` · ${ctxPct}%`}</Text>}
+              {ctxPct !== undefined && <Text color={tint(heat(ctxPct), pal)}>{` · ${ctxPct}%`}</Text>}
               <Text dimColor>{` of ${windowLabel(usage.context.window)}`}</Text>
             </Text>
             {ctxPct !== undefined && meter(ctxPct, heat(ctxPct))}
@@ -131,7 +182,7 @@ export function register(on: On) {
                   <Box key={r.kind} flexDirection="column">
                     <Text>
                       <Text>{LIMIT_NAMES[r.kind] ?? r.kind}</Text>
-                      <Text bold color={heat(r.percentUsed)}>{` ${Math.round(r.percentUsed)}%`}</Text>
+                      <Text bold color={tint(heat(r.percentUsed), pal)}>{` ${Math.round(r.percentUsed)}%`}</Text>
                       {Number.isFinite(reset) && <Text dimColor>{` · resets in ${until(reset)}`}</Text>}
                     </Text>
                     {meter(Math.min(100, r.percentUsed), heat(r.percentUsed))}
@@ -147,7 +198,7 @@ export function register(on: On) {
             {usage.cost !== undefined && <Text bold>{`$${usage.cost.usd.toFixed(2)}`}</Text>}
             {isUp !== null && (
               <Text>
-                <Text color={isUp ? 'green' : 'red'}>● </Text>
+                <Text color={isUp ? pal.accent : pal.hot}>● </Text>
                 <Text dimColor>{`9router ${isUp ? 'running' : 'not answering'}`}</Text>
               </Text>
             )}
@@ -172,6 +223,23 @@ export function register(on: On) {
               {list[0] && <Button key="continue" label="Continue" variant="primary" hotkey="c" onPress={() => void send($, continueText(list[0]!, file))} />}
               <Button key="plan" label="What's next?" variant="secondary" hotkey="n" onPress={() => void send($, planText(file))} />
             </Box>
+          </Box>,
+        )}
+
+        {section(
+          'Mods',
+          <Box flexDirection="column" gap={1}>
+            {MODS.map(m => (
+              <Box key={m.name} flexDirection="row" alignItems="center" gap={2}>
+                <Box flexGrow={1} flexShrink={1} flexDirection="column">
+                  <Text bold>{m.name}</Text>
+                  <Text dimColor wrap="truncate-end">{m.note}</Text>
+                </Box>
+                {m.actions.map(a => (
+                  <Button key={`${m.name}-${a.label}`} label={a.label} variant="secondary" onPress={() => runMod($, a.command, a.args)} />
+                ))}
+              </Box>
+            ))}
           </Box>,
         )}
 

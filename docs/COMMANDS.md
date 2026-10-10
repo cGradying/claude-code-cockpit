@@ -43,6 +43,7 @@ Opens the Cockpit panel, a tab in the side panel next to the conversation.
 | Plan limits | The 5-hour and weekly limits, each with its percent, a bar and how long until it resets. |
 | This session | Cost so far, and whether 9router is running (only if it has answered once). |
 | Next up | The next five open tasks from `NEXT.md`, with Continue (`c`) and What's next? (`n`). What's next? asks Claude to read the plan, recent commits and open PRs and write the next three tasks as `- [ ]` lines at the top of `NEXT.md`, without starting them. |
+| Mods | One row per bundled mod with buttons that run its command: Agents & progress (`/agents-info`), File tree (`/filetree`), Replay (`/replay`), Skin (`/skin noir`, `/skin off`), Reflect (`/reflect-pause`) and Keep-warm (`/keepwarm`, `/keepwarm off`). The buttons name the action they do. Each mod keeps its own state, so the row does not show whether it is on. |
 | Shortcuts | This project's shortcut buttons, `1` to `3` (up to four). |
 
 Bars are solid boxes sized in whole percents, and the empty part follows the app's light or dark theme.

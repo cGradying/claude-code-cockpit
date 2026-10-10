@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
+
+- **Monokai green theme.** Dark: Monokai's green, yellow, pink and cyan on `#272822`. Light: deeper versions of the same hues. The band and panel both use it (it was clay orange).
+- **Mods section in the Cockpit panel.** Press a button to open the agents panel, file tree or replay, set a skin, turn reflect on or off, or arm and stop keep-warm.
+- **New SVG header** in the panel (a prompt mark and the name), drawn from the palette. On the desktop only. It now carries the `xmlns` namespace, which the first SVG band was missing.
 
 - savvy-progress `1.2.0+cockpit.2`: the progress bar and the agents panel were SVG and showed blank in the desktop app. They now use Claude's own text. The bar still appears only once a flow reports progress; `/agents-info` opens the panel any time.
 

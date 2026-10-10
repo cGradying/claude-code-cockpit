@@ -50,19 +50,37 @@ export const planText = (file: string) =>
 
 // ---- the look ----------------------------------------------------------------------------------
 
-export const CLAY = '#d97757'
+// Monokai on the dark theme, the same hues deepened enough to read on the light one.
+export type Palette = {
+  accent: string // Monokai green: brand, primary buttons, healthy
+  warn: string
+  hot: string
+  info: string
+  fg: string
+  muted: string
+  track: string // the empty part of a bar
+  bg?: string // the panel's own ground; the light theme keeps the app's
+}
+const DARK: Palette = { accent: '#a6e22e', warn: '#e6db74', hot: '#f92672', info: '#66d9ef', fg: '#f8f8f2', muted: '#75715e', track: '#3e3d32', bg: '#272822' }
+const LIGHT: Palette = { accent: '#4d7c0f', warn: '#8a6d00', hot: '#c2185b', info: '#0b7285', fg: '#272822', muted: '#75715e', track: '#e6e3dc' }
+export const palette = (isLight: boolean): Palette => (isLight ? LIGHT : DARK)
+export const isLightTheme = (rows: { key: string; value?: unknown }[]) =>
+  String(rows.find(r => r.key === 'theme')?.value ?? 'dark').includes('light')
 
-export type Tone = { color: string; glyph: string; label: string; frac: number }
+export type Tone = { color: 'accent' | 'warn' | 'hot'; glyph: string; label: string; frac: number }
+
+// Tone names become the palette's colours here, so the logic never knows a hex.
+export const tint = (c: Tone['color'] | undefined, p: Palette) => (c === undefined ? undefined : p[c])
 
 // A pie glyph for the share of the cache's hour that is left.
 export const pie = (frac: number) => (frac > 0.875 ? '●' : frac > 0.625 ? '◕' : frac > 0.375 ? '◑' : frac > 0.125 ? '◔' : '○')
 
 export function cacheTone(v: { isWorking: boolean; left: number | null }): Tone {
-  if (v.isWorking) return { color: CLAY, glyph: '✻', label: 'working', frac: 1 }
-  if (v.left === null) return { color: 'red', glyph: '○', label: 'cold', frac: 0 }
-  if (v.left <= 0) return { color: 'red', glyph: '○', label: 'expired', frac: 0 }
+  if (v.isWorking) return { color: 'accent', glyph: '✻', label: 'working', frac: 1 }
+  if (v.left === null) return { color: 'hot', glyph: '○', label: 'cold', frac: 0 }
+  if (v.left <= 0) return { color: 'hot', glyph: '○', label: 'expired', frac: 0 }
   return {
-    color: v.left > 10 * 60_000 ? 'green' : 'yellow',
+    color: v.left > 10 * 60_000 ? 'accent' : 'warn',
     glyph: pie(v.left / TTL_MS),
     label: `${Math.ceil(v.left / 60_000)}m`,
     frac: v.left / TTL_MS,
@@ -70,7 +88,7 @@ export function cacheTone(v: { isWorking: boolean; left: number | null }): Tone 
 }
 
 // Plain until it matters.
-export const heat = (pct?: number) => (pct === undefined ? undefined : pct >= 85 ? 'red' : pct >= 60 ? 'yellow' : undefined)
+export const heat = (pct?: number): Tone['color'] | undefined => (pct === undefined ? undefined : pct >= 85 ? 'hot' : pct >= 60 ? 'warn' : undefined)
 
 // "2h 10m", "3d 4h", "40m": how long until a limit resets.
 export function until(ms: number): string {

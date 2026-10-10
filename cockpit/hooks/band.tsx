@@ -2,7 +2,6 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import {
-  CLAY,
   COMPACT_AT,
   PANEL,
   PANEL_TITLE,
@@ -13,6 +12,9 @@ import {
   continueText,
   firstOpen,
   heat,
+  isLightTheme,
+  palette,
+  tint,
   nextFile,
   openTasks,
   projectRoot,
@@ -161,12 +163,13 @@ export const register: Register = on => {
     const needsCompact = (ctxPct ?? 0) >= COMPACT_AT
     const isUp = await read($, router)
     const { Box, Text, Button } = $.ui.resolve(e)
+    const pal = palette(isLightTheme(await $.config.list().catch(() => [])))
 
     // One piece of the stats: a dim label and a value that turns amber, then red, as it fills.
     const stat = (label: string, value: string, pct?: number) => (
       <Text>
         <Text dimColor>{label} </Text>
-        <Text color={heat(pct)}>{value}</Text>
+        <Text color={tint(heat(pct), pal)}>{value}</Text>
       </Text>
     )
     // Limits only earn a place on the line once they are worth noticing; the panel always shows them.
@@ -175,21 +178,21 @@ export const register: Register = on => {
 
     const stats = (
       <Box flexDirection="row" gap={2} flexShrink={0}>
-        <Text bold color={cache.color}>
+        <Text bold color={tint(cache.color, pal)}>
           {cache.glyph} {cache.label}
         </Text>
         {usage.context.tokens !== undefined &&
           stat('ctx', `${(usage.context.tokens / 1000).toFixed(1)}k${ctxPct !== undefined && ctxPct >= 60 ? ` ${ctxPct}%` : ''}`, ctxPct)}
         {five !== undefined && five >= 60 && stat('5h', `${Math.round(five)}%`, five)}
         {week !== undefined && week >= 60 && stat('wk', `${Math.round(week)}%`, week)}
-        {isUp === false && <Text color="red">9router down</Text>}
+        {isUp === false && <Text color={pal.hot}>9router down</Text>}
       </Box>
     )
 
     const upNext = (
       <Box flexGrow={1} flexShrink={1} minWidth={10}>
         <Text wrap="truncate-end">
-          <Text bold color={CLAY}>
+          <Text bold color={pal.accent}>
             Next{' '}
           </Text>
           {task ?? <Text dimColor>nothing queued</Text>}

@@ -167,10 +167,11 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await clock.settle()
     const tree = await text(await panel($, surface))
 
-    for (const word of ['Prompt cache', '42m left', 'Context', '72.5k tokens', '36%', '200k', '"width":"36%"', 'Plan limits', '5-hour limit', 'Weekly limit', 'resets in 2h 10m', '$0.21', 'Next up', 'Write PLAN-2.md', 'Later thing', 'Shortcuts', 'Rebuild']) {
+    for (const word of ['Prompt cache', '42m left', 'Context', '72.5k tokens', '36%', '200k', '"width":"36%"', 'Plan limits', '5-hour limit', 'Weekly limit', 'resets in 2h 10m', '$0.21', 'Next up', 'Write PLAN-2.md', 'Later thing', 'Mods', 'Agents & progress', 'File tree', 'Replay', 'Skin', 'Reflect', 'Keep-warm', 'Shortcuts', 'Rebuild']) {
       expect(tree).toContain(word)
     }
-    expect(tree).not.toContain('"type":"Svg"')
+    if (surface === 'desktop') expect(tree).toContain('xmlns=') // the header drawing is an image, which needs its namespace
+    expect(tree).toContain('#a6e22e') // Monokai green
   })
 
   test(`${surface} panel: bar widths are whole percentages, which is all the app accepts`, async ($, on) => {
@@ -188,14 +189,16 @@ for (const surface of ['terminal', 'desktop'] as const) {
     on('config.list', () => ({ value: [{ key: 'theme', label: 'Theme', kind: 'choice', value: 'light', provider: { plugin: 'engine', tier: 'core' }, isLocked: false }] }) as never)
     await start($)
     await clock.settle()
-    expect(await text(await panel($, surface))).toContain('#e6e3dc')
+    const tree = await text(await panel($, surface))
+    expect(tree).toContain('#e6e3dc')
+    expect(tree).toContain('#4d7c0f') // deeper green on the light theme
   })
 
   test(`${surface} panel: dark by default`, async ($, on) => {
     const { clock } = engine(on, 36)
     await start($)
     await clock.settle()
-    expect(await text(await panel($, surface))).toContain('#303030')
+    expect(await text(await panel($, surface))).toContain('#3e3d32')
   })
 
   test(`${surface} panel: its buttons act`, async ($, on) => {
@@ -213,6 +216,12 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await ui.press({ key: 'compact' })
     await clock.advance(10)
     expect(commands[0]).toContain('compact Keep the current plan')
+
+    await ui.press({ key: 'Agents & progress-Open' })
+    await ui.press({ key: 'Skin-Noir' })
+    await ui.press({ key: 'Keep-warm-Stop' })
+    await clock.advance(10)
+    expect(commands.slice(1).map(c => c.trim())).toEqual(['agents-info', 'skin noir', 'keepwarm off'])
   })
 
   test(`${surface} panel: an empty list says what to do`, async ($, on) => {
