@@ -60,10 +60,11 @@ export type Palette = {
   fg: string
   muted: string
   track: string // the empty part of a bar
+  surface: string // a header strip: a step off the ground
   bg?: string // the panel's own ground; the light theme keeps the app's
 }
-const DARK: Palette = { accent: '#a6e22e', warn: '#e6db74', hot: '#f92672', info: '#66d9ef', fg: '#f8f8f2', muted: '#75715e', track: '#3e3d32', bg: '#272822' }
-const LIGHT: Palette = { accent: '#4d7c0f', warn: '#8a6d00', hot: '#c2185b', info: '#0b7285', fg: '#272822', muted: '#75715e', track: '#e6e3dc' }
+const DARK: Palette = { accent: '#a6e22e', warn: '#e6db74', hot: '#f92672', info: '#66d9ef', fg: '#f8f8f2', muted: '#75715e', track: '#3e3d32', surface: '#34352d', bg: '#272822' }
+const LIGHT: Palette = { accent: '#4d7c0f', warn: '#8a6d00', hot: '#c2185b', info: '#0b7285', fg: '#272822', muted: '#75715e', track: '#e6e3dc', surface: '#ece9e1' }
 export const palette = (isLight: boolean): Palette => (isLight ? LIGHT : DARK)
 export const isLightTheme = (rows: { key: string; value?: unknown }[]) =>
   String(rows.find(r => r.key === 'theme')?.value ?? 'dark').includes('light')

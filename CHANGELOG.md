@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1
+
+- **Git panel redesigned like VS Code's Source Control**: a green status bar with the branch and `↑ahead ↓behind`, a commit message box (Enter commits everything with exactly that message), a Changes list with VS Code's letters (`M` modified, `A` added, `D` deleted, `U` new, `R` renamed), a Graph of the last 12 commits with short times and one ref each, and folding sections with square counts. Your folds are remembered. The worktree list marks the one you are in.
+- Long commit subjects and branch names are cut with an ellipsis instead of wrapping.
+
 ## 0.5.0
 
 - **Git panel**: `/git` or the `[ Git ]` button on the band opens a second panel. It shows the branch (clean or how many staged, changed and new files, ahead and behind), your open pull requests with stacked ones indented in merge order and a checks mark each, the worktrees with the merged ones flagged, and a Tidy up button for what already landed. Buttons (Commit, Push, Open PR, Sync, Merge, Tidy up) send a prompt to Claude, so you see every command and the permission prompts still apply. The panel itself only reads (`git`, and `gh` for pull requests).

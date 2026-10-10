@@ -1,6 +1,6 @@
 {
   "name": "cockpit",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A one-line band above the prompt and a roomy Cockpit panel (prompt-cache countdown, context, plan limits, cost, next tasks, shortcuts), plus guards: no Claude credit lines in shell commands, pasted API keys held back, impeccable nudge on UI prompts.",
   "author": {
     "name": "cGradying"

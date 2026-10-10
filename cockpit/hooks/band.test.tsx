@@ -35,6 +35,7 @@ function engine(on: On, pct: number, opts: Opts = {}) {
     const argv = (e as unknown as { argv: string[] }).argv.join(' ')
     const out = (stdout: string) => ({ value: { exitCode: 0, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }) as never
     if (argv.startsWith('git status')) return out('## claude/feat...origin/claude/feat [ahead 1]\n M a.ts\n?? b.ts\n')
+    if (argv.startsWith('git log')) return out('abc1234\x1fAdd the git panel\x1f3 hours ago\x1fHEAD -> claude/feat, origin/main\ndef5678\x1fFix signing\x1f2 days ago\x1f')
     if (argv.startsWith('git symbolic-ref')) return out('origin/main\n')
     if (argv.startsWith('git worktree')) return out('worktree /r\nbranch refs/heads/main\n\nworktree /r/w\nbranch refs/heads/old-pr\n')
     if (argv.startsWith('git branch')) return out('main\nold-pr\n')
@@ -243,7 +244,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await clock.settle()
     const tree = await text(ui)
 
-    for (const word of ['claude/feat', 'from main', '1 changed', '1 new', '#72 Signing', '#73 Eight servers', 'merged', 'Tidy up 1', 'merge the top one first']) {
+    for (const word of ['SOURCE CONTROL', '⎇ claude/feat', '↑1 ↓0', 'CHANGES', 'a.ts', 'GRAPH', 'Add the git panel', '3h', 'Fix signing', '2d', 'PULL REQUESTS', '#72 Signing', '#73 Eight servers', 'merged', 'Tidy up 1', 'merge the top one first']) {
       expect(tree).toContain(word)
     }
     await ui.press({ key: 'commit' })

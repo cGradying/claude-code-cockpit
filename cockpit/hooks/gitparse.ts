@@ -1,4 +1,4 @@
-import type { GitInfo, Pr, Worktree } from '../types'
+import type { GitCommit, GitFile, GitInfo, Pr, Worktree } from '../types'
 
 // Pure readers of what git and gh print, so they can be tested without a repository.
 
@@ -12,14 +12,16 @@ export function parseStatus(text: string) {
   let staged = 0
   let changed = 0
   let untracked = 0
+  const files: GitFile[] = []
   for (const l of lines.slice(1)) {
+    if (files.length < 200) files.push({ x: l[0] ?? ' ', y: l[1] ?? ' ', path: l.slice(3).replace(/^.* -> /, '') })
     if (l.startsWith('??')) untracked++
     else {
       if (l[0] !== ' ') staged++
       if (l[1] !== ' ') changed++
     }
   }
-  return { branch, hasUpstream, ahead, behind, staged, changed, untracked }
+  return { branch, hasUpstream, ahead, behind, staged, changed, untracked, files }
 }
 
 export function parseWorktrees(text: string): Worktree[] {
@@ -91,3 +93,21 @@ export function tidyPlan(g: Pick<GitInfo, 'branch' | 'base' | 'worktrees' | 'mer
 }
 
 export const repoName = (root: string) => root.replace(/\/\.claude\/worktrees\/[^/]+$/, '').split('/').pop() ?? root
+
+// "3 hours ago" -> "3h", "2 months ago" -> "2mo".
+const UNITS: Record<string, string> = { second: 's', minute: 'm', hour: 'h', day: 'd', week: 'w', month: 'mo', year: 'y' }
+const short = (ago: string) => ago.replace(/^(\d+) (\w+?)s? ago$/, (_, n: string, u: string) => `${n}${UNITS[u] ?? u}`)
+
+// `git log --pretty=format:%h%x1f%s%x1f%ar%x1f%D`: one commit a line, its refs after the time.
+export function parseLog(text: string): GitCommit[] {
+  return text
+    .split('\n')
+    .filter(Boolean)
+    .map(line => {
+      const [hash = '', subject = '', when = '', refs = ''] = line.split('\x1f')
+      return { hash, subject, when: short(when), refs: refs.split(', ').map(r => r.replace('HEAD -> ', '')).filter(Boolean) }
+    })
+}
+
+// The letter VS Code shows for a file: its index column, else its working-tree column; ?? is U.
+export const statusLetter = (f: GitFile) => (f.x === '?' ? 'U' : f.x !== ' ' ? f.x : f.y)

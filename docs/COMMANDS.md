@@ -50,11 +50,13 @@ Bars are solid boxes sized in whole percents, and the empty part follows the app
 
 ### `/git`
 
-Opens the git panel (also the `[ Git ]` button, key `g`, on the band). It reads the repository the session is in; it never changes anything.
+Opens the git panel (also the `[ Git ]` button, key `g`, on the band), laid out like VS Code's Source Control with sections you can fold. It reads the repository the session is in; it never changes anything.
 
 | Block | Shows |
 |---|---|
-| Branch | Branch and base, clean or counts of staged, changed and new files, ahead and behind. Buttons: Commit, Push, Open PR, Sync with base, shown only when they apply. |
+| Branch | A green bar with the branch and `↑ahead ↓behind` (or `not pushed`). Under it Push, Open PR and Sync with base, shown only when they apply, and, when there are changes, a commit message box: type a message and press Enter to commit everything with exactly that message. |
+| Changes | Changed files with VS Code's letters: `M` modified (yellow), `A` added and `U` new (green), `D` deleted (pink), `R` renamed (cyan). A button asks Claude to write the message for you. |
+| Graph | The last 12 commits, the newest filled, each with its short age and one ref (`origin/…` in cyan, tags and branches in green). |
 | Pull requests | Your open PRs from `gh`. A PR whose base is another open PR's branch is indented under it, bottom of the stack first, with a checks mark. Merge appears when checks pass. |
 | Worktrees | Every worktree, with the ones whose work already landed marked `merged`. |
 | Tidy up | How many merged worktrees and branches can go, and one button for them. |

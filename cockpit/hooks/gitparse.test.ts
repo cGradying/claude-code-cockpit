@@ -1,10 +1,10 @@
 import { expect, test } from 'claude-code/testing'
 
-import { orderPrs, parsePrs, parseStatus, parseWorktrees, tidyPlan } from './gitparse'
+import { orderPrs, parseLog, parsePrs, parseStatus, parseWorktrees, statusLetter, tidyPlan } from './gitparse'
 
 test('status: branch, upstream, ahead and behind, and the three kinds of change', () => {
   const s = parseStatus('## claude/feat...origin/claude/feat [ahead 2, behind 1]\nM  a.ts\n M b.ts\nMM c.ts\n?? d.ts\n')
-  expect(s).toEqual({ branch: 'claude/feat', hasUpstream: true, ahead: 2, behind: 1, staged: 2, changed: 2, untracked: 1 })
+  expect({ ...s, files: s.files.length }).toEqual({ branch: 'claude/feat', hasUpstream: true, ahead: 2, behind: 1, staged: 2, changed: 2, untracked: 1, files: 4 })
   expect(parseStatus('## main\n').hasUpstream).toBe(false)
 })
 
@@ -37,4 +37,15 @@ test('tidy: only merged work, never the current branch, the base or the main che
   })
   expect(plan.worktrees.map(w => w.branch)).toEqual(['done'])
   expect(plan.branches).toEqual(['old'])
+})
+
+test('files: VS Code letters, and the log reads short times and refs', () => {
+  const s = parseStatus('## x\nM  a.ts\n M b.ts\nA  c.ts\n?? d.ts\nR  old.ts -> new.ts\n')
+  expect(s.files.map(statusLetter)).toEqual(['M', 'M', 'A', 'U', 'R'])
+  expect(s.files[4]!.path).toBe('new.ts')
+  const log = parseLog('abc\x1fSubject\x1f3 hours ago\x1fHEAD -> main, origin/main\ndef\x1fOld\x1f2 months ago\x1f')
+  expect(log).toEqual([
+    { hash: 'abc', subject: 'Subject', when: '3h', refs: ['main', 'origin/main'] },
+    { hash: 'def', subject: 'Old', when: '2mo', refs: [] },
+  ])
 })

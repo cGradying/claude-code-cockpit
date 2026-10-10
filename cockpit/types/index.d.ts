@@ -10,6 +10,8 @@ export type Pr = {
   isDraft: boolean
   checks: 'pass' | 'fail' | 'pending' | 'none'
 }
+export type GitFile = { x: string; y: string; path: string }
+export type GitCommit = { hash: string; subject: string; when: string; refs: string[] }
 export type GitInfo = {
   root: string
   branch: string
@@ -20,6 +22,8 @@ export type GitInfo = {
   staged: number
   changed: number
   untracked: number
+  files: GitFile[]
+  log: GitCommit[]
   worktrees: Worktree[]
   merged: string[] // local branches already merged into the base
   prs: Pr[] | null // null: gh is missing or not signed in
@@ -39,6 +43,7 @@ declare module 'claude-code' {
       router: boolean | null
       quick: Quick[]
       git: GitInfo | null
+      gitOpen: Record<string, boolean>
     }
   }
 }
