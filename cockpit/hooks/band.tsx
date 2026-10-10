@@ -3,6 +3,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import {
   COMPACT_AT,
+  GIT_PANEL,
   PANEL,
   PANEL_TITLE,
   ROUTER_URL,
@@ -80,6 +81,8 @@ function compactNow($: EngineInterface, file: string) {
   )
 }
 
+const openGit = ($: EngineInterface) => $.ui.open({ id: GIT_PANEL, title: 'Git' })
+
 async function openPanel($: EngineInterface) {
   return $.ui.open({ id: PANEL, title: PANEL_TITLE })
 }
@@ -100,6 +103,10 @@ export const register: Register = on => {
     await $.command.register({
       name: 'cockpit',
       description: 'Open the cockpit panel: cache, context, limits, cost and the next tasks',
+    })
+    await $.command.register({
+      name: 'git',
+      description: 'Open the git panel: branch, open and stacked PRs, worktrees and what is safe to tidy up',
     })
     await loadQuick($).catch(() => undefined)
     void pulse($)
@@ -143,6 +150,11 @@ export const register: Register = on => {
   on('command.run', { command: 'cockpit' }, async $ => {
     const opened = await openPanel($)
     return { text: opened.isPlaced ? 'Cockpit panel opened.' : `The panel waits: ${opened.reason}` }
+  })
+
+  on('command.run', { command: 'git' }, async $ => {
+    const opened = await openGit($)
+    return { text: opened.isPlaced ? 'Git panel opened.' : `The panel waits: ${opened.reason}` }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, nextHook) => {
@@ -203,12 +215,21 @@ export const register: Register = on => {
     const buttons = (
       <Box flexDirection="row" gap={2} flexShrink={0}>
         {!e.props.isWorking && needsCompact && (
-          <Button key="compact" label={`Compact ${ctxPct}%`} variant="primary" hotkey="k" onPress={() => compactNow($, file)} />
+          <Button key="compact" plain hotkey="k" onPress={() => compactNow($, file)}>
+            <Text bold color={pal.accent}>{`[ Compact ${ctxPct}% ]`}</Text>
+          </Button>
         )}
         {!e.props.isWorking && task && (
-          <Button key="continue" label="Continue" variant="primary" hotkey="c" onPress={() => void send($, continueText(task, file))} />
+          <Button key="continue" plain hotkey="c" onPress={() => void send($, continueText(task, file))}>
+            <Text bold color={pal.accent}>[ Continue ]</Text>
+          </Button>
         )}
-        <Button key="details" label="Details" plain hotkey="d" onPress={() => void openPanel($)} />
+        <Button key="git" plain hotkey="g" onPress={() => void openGit($)}>
+          <Text>[ Git ]</Text>
+        </Button>
+        <Button key="details" plain hotkey="d" onPress={() => void openPanel($)}>
+          <Text>[ Details ]</Text>
+        </Button>
       </Box>
     )
 

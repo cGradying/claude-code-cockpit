@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- **Git panel**: `/git` or the `[ Git ]` button on the band opens a second panel. It shows the branch (clean or how many staged, changed and new files, ahead and behind), your open pull requests with stacked ones indented in merge order and a checks mark each, the worktrees with the merged ones flagged, and a Tidy up button for what already landed. Buttons (Commit, Push, Open PR, Sync, Merge, Tidy up) send a prompt to Claude, so you see every command and the permission prompts still apply. The panel itself only reads (`git`, and `gh` for pull requests).
+- **Pixel look**: controls are text, `[ Continue ]`, not rounded buttons; the panel header is a pixel-art prompt mark with a block cursor; bars are square. The desktop still draws its own window, sidebar and message bubbles, which a mod cannot restyle.
+- **Skins go square and pixel**: cards and labels have square corners and crisp edges, the tool icons are 8 by 8 pixel bitmaps, and the spinners are stepped blocks instead of circles and arcs. This applies to every skin.
+- The old hot-reload test copy that doubled the band is removed.
+
 ## 0.4.0
 
 - **`/skin monokai`**: a new built-in skin in the Monokai palette (green user lines, cyan reads, orange writes, yellow runs, purple searches, pink web and errors). It restyles the transcript's tool rows, diffs, tables and code cards; it does not change the app's window chrome.

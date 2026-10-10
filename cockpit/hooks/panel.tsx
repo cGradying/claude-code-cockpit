@@ -3,6 +3,7 @@ import type { EngineInterface, On } from 'claude-code'
 
 import {
   COMPACT_AT,
+  MARK,
   PANEL,
   TTL_MS,
   cacheTone,
@@ -84,17 +85,23 @@ const MODS: { name: string; note: string; actions: { label: string; command: str
   },
 ]
 
-// The mark and the name: a prompt in a rounded square, drawn here so it follows the palette.
+// The mark and the name, all square: a prompt in pixel cells and a block cursor, drawn from the palette.
 // Drawn as an image, so it needs the namespace; the surface's own text falls back where it has no Svg.
-const headerSvg = (p: Palette) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="52" viewBox="0 0 300 52">` +
-  `<rect x="1" y="6" width="40" height="40" rx="10" fill="${p.bg ?? '#f6f4ee'}" stroke="${p.accent}" stroke-width="2"/>` +
-  `<path d="M12 19 L22 26 L12 33" fill="none" stroke="${p.accent}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
-  `<path d="M25 35 H33" stroke="${p.info}" stroke-width="3" stroke-linecap="round"/>` +
-  `<text x="54" y="29" font-family="SF Mono, Menlo, ui-monospace, monospace" font-size="22" font-weight="700" fill="${p.fg}">cockpit</text>` +
-  `<rect x="150" y="12" width="11" height="19" fill="${p.accent}"/>` +
-  `<text x="54" y="45" font-family="SF Mono, Menlo, ui-monospace, monospace" font-size="11" fill="${p.muted}">cache, context, limits, mods</text>` +
-  `</svg>`
+const headerSvg = (p: Palette) => {
+  const cells = MARK.flatMap((row, y) =>
+    [...row].map((c, x) => (c === '#' ? `<rect x="${x * 4 + 6}" y="${y * 4 + 6}" width="4" height="4" fill="${y >= 6 ? p.info : p.accent}"/>` : '')),
+  ).join('')
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="52" viewBox="0 0 300 52" shape-rendering="crispEdges">` +
+    `<rect x="1" y="1" width="42" height="42" fill="${p.bg ?? '#f6f4ee'}" stroke="${p.accent}" stroke-width="2"/>` +
+    cells +
+    `<text x="58" y="26" font-family="SF Mono, Menlo, ui-monospace, monospace" font-size="22" font-weight="700" letter-spacing="1" fill="${p.fg}">cockpit</text>` +
+    `<rect x="164" y="9" width="12" height="19" fill="${p.accent}"/>` +
+    `<text x="58" y="41" font-family="SF Mono, Menlo, ui-monospace, monospace" font-size="11" fill="${p.muted}">cache, context, limits, mods</text>` +
+    `</svg>`
+  )
+}
+
 const LIMIT_NAMES: Record<string, string> = { five_hour: '5-hour limit', seven_day: 'Weekly limit' }
 
 // The roomy view: everything the band leaves out, in one place beside the conversation.
@@ -127,6 +134,12 @@ export function register(on: On) {
     )
     // A solid bar: a track and a filled part sized in percent, so it is always exactly as wide as the
     // panel and can never wrap or show seams the way a row of block characters does.
+    // A control drawn as text, `[ Open ]`, so nothing about it is rounded. The label stays its name.
+    const btn = (key: string, label: string, onPress: () => void, o: { hotkey?: string; isMain?: boolean } = {}) => (
+      <Button key={key} plain hotkey={o.hotkey} onPress={onPress}>
+        <Text bold={o.isMain} color={o.isMain ? pal.accent : undefined}>{`[ ${label} ]`}</Text>
+      </Button>
+    )
     const meter = (pct: number, tone?: Tone['color']) => (
       <Box width="100%" height={1} backgroundColor={pal.track}>
         <Box width={`${Math.max(0, Math.min(100, Math.round(pct)))}%`} height={1} backgroundColor={tint(tone, pal) ?? pal.accent} />
@@ -167,7 +180,7 @@ export function register(on: On) {
             </Text>
             {ctxPct !== undefined && meter(ctxPct, heat(ctxPct))}
             <Box>
-              <Button key="compact" label="Compact" variant={(ctxPct ?? 0) >= COMPACT_AT ? 'primary' : 'secondary'} hotkey="k" onPress={() => compactNow($, file)} />
+              {btn('compact', 'Compact', () => compactNow($, file), { hotkey: 'k', isMain: (ctxPct ?? 0) >= COMPACT_AT })}
             </Box>
           </Box>,
         )}
@@ -220,8 +233,8 @@ export function register(on: On) {
               </Box>
             )}
             <Box flexDirection="row" gap={2}>
-              {list[0] && <Button key="continue" label="Continue" variant="primary" hotkey="c" onPress={() => void send($, continueText(list[0]!, file))} />}
-              <Button key="plan" label="What's next?" variant="secondary" hotkey="n" onPress={() => void send($, planText(file))} />
+              {list[0] && btn('continue', 'Continue', () => void send($, continueText(list[0]!, file)), { hotkey: 'c', isMain: true })}
+              {btn('plan', "What's next?", () => void send($, planText(file)), { hotkey: 'n' })}
             </Box>
           </Box>,
         )}
@@ -236,7 +249,7 @@ export function register(on: On) {
                   <Text dimColor wrap="truncate-end">{m.note}</Text>
                 </Box>
                 {m.actions.map(a => (
-                  <Button key={`${m.name}-${a.label}`} label={a.label} variant="secondary" onPress={() => runMod($, a.command, a.args)} />
+                  btn(`${m.name}-${a.label}`, a.label, () => runMod($, a.command, a.args))
                 ))}
               </Box>
             ))}
@@ -248,7 +261,7 @@ export function register(on: On) {
             'Shortcuts',
             <Box flexDirection="row" gap={2} flexWrap="wrap">
               {shortcuts.map((q, i) => (
-                <Button key={`quick-${i}`} label={q.label} variant="secondary" hotkey={String(i + 1)} onPress={() => void send($, q.prompt)} />
+                btn(`quick-${i}`, q.label, () => void send($, q.prompt), { hotkey: String(i + 1) })
               ))}
             </Box>,
           )}

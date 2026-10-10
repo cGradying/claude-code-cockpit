@@ -70,7 +70,8 @@ export const settled = (source: string): string => source.replace('</style>', `$
 export const riseDelay =(index: number, stepMs: number, startMs = 80): string =>
   `style="animation-delay:${startMs + index * stepMs}ms"`
 
-const RADIUS = 12
+// cockpit patch: pixel look. Square corners, a hard hairline, crisp edges.
+const RADIUS = 0
 
 // The room a card leaves in its top-right corner for a Copy button laid over it.
 export const CONTROL_SLOT = 84
@@ -85,13 +86,13 @@ export function svgCard(width: number, height: number, palette: Palette, style: 
   const clip = `corners-${width}x${height}`
 
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" shape-rendering="crispEdges">`,
     `<defs><clipPath id="${clip}"><rect width="${width}" height="${height}" rx="${RADIUS}"/></clipPath></defs>`,
     // Sans for text that names no font of its own: a CSS rule on all text would beat the
     // monospace attribute on code, paths and output.
     `<style>text{fill:${palette.fg}}text:not([font-family]){font-family:${FONT}}${MOTION}${style}</style>`,
     `<g class="card"><g clip-path="url(#${clip})">${body}</g>`,
-    `<rect x=".5" y=".5" width="${width - 1}" height="${height - 1}" rx="${RADIUS - 0.5}" fill="none" stroke="${palette.fg}" stroke-opacity=".16"/></g>`,
+    `<rect x=".5" y=".5" width="${width - 1}" height="${height - 1}" rx="${RADIUS - 0.5}" fill="none" stroke="${palette.fg}" stroke-opacity=".34"/></g>`,
     `</svg>`,
   ].join('')
 }
@@ -105,8 +106,8 @@ export function pill(right: number, y: number, text: string, color: string, pale
   const width = Math.ceil(measure(text, true, 11) + 16)
   const left = right - width
 
-  return `<rect x="${left}" y="${y}" width="${width}" height="20" rx="10" fill="${color}" fill-opacity=".14"/><text x="${left + width / 2}" y="${y + 14}" text-anchor="middle" font-family="${MONO}" font-size="11" style="fill:${color}">${escape(text)}</text>`
+  return `<rect x="${left}" y="${y}" width="${width}" height="20" fill="${color}" fill-opacity=".14"/><text x="${left + width / 2}" y="${y + 14}" text-anchor="middle" font-family="${MONO}" font-size="11" style="fill:${color}">${escape(text)}</text>`
 }
 
 export const strokeIcon = (path: string, x: number, y: number, size: number, color: string): string =>
-  `<g transform="translate(${x} ${y}) scale(${size / 24})" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path}</g>`
+  `<g transform="translate(${x} ${y}) scale(${size / 24})" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter">${path}</g>`

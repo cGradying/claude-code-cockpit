@@ -48,6 +48,19 @@ Opens the Cockpit panel, a tab in the side panel next to the conversation.
 
 Bars are solid boxes sized in whole percents, and the empty part follows the app's light or dark theme.
 
+### `/git`
+
+Opens the git panel (also the `[ Git ]` button, key `g`, on the band). It reads the repository the session is in; it never changes anything.
+
+| Block | Shows |
+|---|---|
+| Branch | Branch and base, clean or counts of staged, changed and new files, ahead and behind. Buttons: Commit, Push, Open PR, Sync with base, shown only when they apply. |
+| Pull requests | Your open PRs from `gh`. A PR whose base is another open PR's branch is indented under it, bottom of the stack first, with a checks mark. Merge appears when checks pass. |
+| Worktrees | Every worktree, with the ones whose work already landed marked `merged`. |
+| Tidy up | How many merged worktrees and branches can go, and one button for them. |
+
+Every button sends a prompt to Claude (`Commit` asks it to group and commit, `Merge` asks it to check and merge, `Tidy up` lists exactly what to remove and asks it to confirm there is no unpushed work first). Nothing runs behind your back, and blast-radius still guards `git reset --hard`, force pushes and the like. If `gh` is not signed in, the pull request block says so and is hidden.
+
 ### `/next`
 
 | Typed | Does |

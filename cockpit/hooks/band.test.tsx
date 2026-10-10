@@ -31,6 +31,17 @@ function engine(on: On, pct: number, opts: Opts = {}) {
   on('fs.read', () => ({ value: opts.tasks ?? '- [x] F1 tokens\n- [ ] Write PLAN-2.md\n- [ ] Later thing\n' }))
   on('http.fetch', () => ({ value: { status: opts.router === false ? 503 : 200, ok: opts.router !== false, headers: {}, text: '{}' } }))
   on('command.register', (_, e) => ({ value: { command: e.name } }) as never)
+  on('process.run', (_, e) => {
+    const argv = (e as unknown as { argv: string[] }).argv.join(' ')
+    const out = (stdout: string) => ({ value: { exitCode: 0, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }) as never
+    if (argv.startsWith('git status')) return out('## claude/feat...origin/claude/feat [ahead 1]\n M a.ts\n?? b.ts\n')
+    if (argv.startsWith('git symbolic-ref')) return out('origin/main\n')
+    if (argv.startsWith('git worktree')) return out('worktree /r\nbranch refs/heads/main\n\nworktree /r/w\nbranch refs/heads/old-pr\n')
+    if (argv.startsWith('git branch')) return out('main\nold-pr\n')
+    if (argv.includes('--state open')) return out(JSON.stringify([{ number: 72, title: 'Signing', headRefName: 'a', baseRefName: 'main', isDraft: false, statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }] }, { number: 73, title: 'Eight servers', headRefName: 'b', baseRefName: 'a', isDraft: false, statusCheckRollup: [] }]))
+    if (argv.includes('--state merged')) return out('[{"headRefName":"old-pr"}]')
+    return out('')
+  })
   on('command.run', (_, e) => {
     commands.push(`${e.command} ${e.args}`)
     return { text: '' }
@@ -70,7 +81,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     expect(tree).not.toContain('59%') // limits below 60% stay in the panel
     expect(tree).not.toContain('0.21') // so does the cost
     expect(await ui.find({ key: 'compact' })).toBeUndefined()
-    expect(await ui.findAll({ type: 'Button' })).toHaveLength(2) // continue, details
+    expect(await ui.findAll({ type: 'Button' })).toHaveLength(3) // continue, git, details
 
     await ui.press({ key: 'continue' })
     await ui.press({ key: 'continue' })
@@ -146,7 +157,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await start($)
     await clock.settle()
     const ui = await band($, surface, { isWorking: true })
-    expect(await ui.findAll({ type: 'Button' })).toHaveLength(1)
+    expect(await ui.findAll({ type: 'Button' })).toHaveLength(2) // git, details
     expect(await text(ui)).toContain('working')
     expect(await text(ui)).toContain('72.5k')
   })
@@ -222,6 +233,25 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await ui.press({ key: 'Keep-warm-Stop' })
     await clock.advance(10)
     expect(commands.slice(1).map(c => c.trim())).toEqual(['agents-info', 'skin noir', 'keepwarm off'])
+  })
+
+  test(`${surface} git panel: branch, a stack in merge order, tidy, and buttons that ask Claude`, async ($, on) => {
+    const { sent, clock } = engine(on, 36)
+    await start($)
+    await clock.settle()
+    const ui = await $.ui.mount({ plugin: 'cockpit', surface, component: 'Pane', requestId: 'cockpit-git', props: PANE_PROPS })
+    await clock.settle()
+    const tree = await text(ui)
+
+    for (const word of ['claude/feat', 'from main', '1 changed', '1 new', '#72 Signing', '#73 Eight servers', 'merged', 'Tidy up 1', 'merge the top one first']) {
+      expect(tree).toContain(word)
+    }
+    await ui.press({ key: 'commit' })
+    expect(sent[0]).toContain('uncommitted changes')
+    await ui.press({ key: 'merge-72' })
+    expect(sent[1]).toContain('PR #72')
+    await ui.press({ key: 'tidy' })
+    expect(sent[2]).toContain('old-pr')
   })
 
   test(`${surface} panel: an empty list says what to do`, async ($, on) => {

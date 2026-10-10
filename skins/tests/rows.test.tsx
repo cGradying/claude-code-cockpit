@@ -98,14 +98,15 @@ test('a Bash call is a node on the terminal\u2019s rail and an icon row on the d
 
   const desktop = await $.ui.mount(toolUse(call('Bash', { command: 'pnpm test' }), 'desktop'))
   const icon = (await desktop.find({ type: 'Svg' })) as { props: { source: string } } | undefined
-  expect(icon?.props.source).toContain('M5 7l5 5-5 5')
+  expect(icon?.props.source).toContain('<rect x="0" y="0" width="3" height="3"/>') // the pixel prompt mark
+  expect(icon?.props.source).not.toContain('<circle') // nothing round
   expect(await desktop.find({ type: 'Text', text: /Bash {2}pnpm test/ })).toBeDefined()
   expect(await desktop.find({ type: 'Text', text: '┃' })).toBeUndefined()
   await desktop.unmount()
 
   const running = await $.ui.mount(toolUse(call('Bash', { command: 'sleep 9' }, { tool_use_id: 'tu3', isRunning: true }), 'desktop'))
   const spinning = (await running.find({ type: 'Svg' })) as { props: { source: string } } | undefined
-  expect(spinning?.props.source).toContain('class="spin"')
+  expect(spinning?.props.source).toContain('class="blink"') // a running tool blinks in steps
 })
 
 test('an edit shows its added and removed lines', async ($, on) => {
@@ -228,7 +229,7 @@ test('the terminal spinner shimmers, the desktop one is an animated icon beside 
 
   const desktop = await $.ui.mount(spinner('desktop'))
   const icon = (await desktop.find({ type: 'Svg' })) as { props: { source: string } } | undefined
-  expect(icon?.props.source).toContain('class="bar')
+  expect(icon?.props.source).toContain('class="px b1')
   expect(await desktop.find({ type: 'Text', text: 'Sauteing' })).toBeDefined()
 })
 

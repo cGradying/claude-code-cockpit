@@ -10,6 +10,7 @@ This is a vendored copy, kept as close to upstream as possible.
 
 ## Changes from upstream
 
+- hooks/svg-kit.ts, hooks/icons.ts: pixel look for every skin. Square card corners and labels (`RADIUS = 0`), crisp edges, square line caps, 8x8 bitmap tool icons, stepped square spinners. Tests adapted.
 - hooks/themes/monokai.ts, hooks/themes/index.ts: added a `monokai` built-in skin (Monokai palette). Not in upstream.
 
 - hooks/command.ts: adds START_PREFS (skin off, band off) and uses it as the parsePrefs fallback, so a first run draws nothing until you run /skin. DEFAULT_PREFS is unchanged, so `/skin on` still goes to noir.

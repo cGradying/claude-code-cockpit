@@ -9,12 +9,13 @@ description: Cheat sheet for the cockpit plugin and the mods it installs (band, 
 
 ## The band and the panel (cockpit itself)
 
-One line above the prompt: the cache countdown (`◔ 42m`), context, and the next task, with Continue and Details at the right. The 5-hour and weekly limits join the line once they pass 60%; `9router down` shows only if it was up and stopped. Press the buttons with a click, or focus the band (ctrl+x tab) and use the key.
+One line above the prompt: the cache countdown (`◔ 42m`), context, and the next task, with `[ Continue ]`, `[ Git ]` and `[ Details ]` at the right. The 5-hour and weekly limits join the line once they pass 60%; `9router down` shows only if it was up and stopped. Press the buttons with a click, or focus the band (ctrl+x tab) and use the key.
 
 | Button | Key | Does |
 |---|---|---|
 | Continue | `c` | Sends "continue with the next task" for the first open line of the project's `.claude/NEXT.md`. |
-| Details | `d` | Opens the Cockpit panel (also `/cockpit`). |
+| Git | `g` | Opens the git panel (also `/git`): branch state, your open and stacked PRs in merge order, worktrees, and a Tidy up for merged leftovers. Its buttons ask Claude to do the change; the panel only reads. |
+| Details | `d` | Opens the Cockpit panel (also `/cockpit`), which has a Mods section with buttons for the agents panel, file tree, replay, skin, reflect and keep-warm. |
 | Compact | `k` | Appears past 70% context. Runs `/compact` and tells it to keep the plan, open tasks, PRs, decisions and open bugs. |
 
 The **Cockpit panel** is a tab in the side panel with room for everything: prompt cache (time left and a bar), context (tokens, percent, window, Compact), plan limits with when they reset, session cost, your next five tasks (Continue `c`, What's next? `n`, which asks Claude to write the next three into `NEXT.md` without starting them), and this project's shortcut buttons (`1` to `3`). Shortcuts come from `.claude/quick.json`, a list of `{ "label", "prompt" }`; without one, IntPortal and Obsidian-vault projects get presets.

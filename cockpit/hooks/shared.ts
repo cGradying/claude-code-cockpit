@@ -10,6 +10,7 @@ export const COMPACT_AT = 70
 export const ROUTER_URL = 'http://127.0.0.1:20128/v1/models'
 export const PANEL = 'cockpit'
 export const PANEL_TITLE = 'Cockpit'
+export const GIT_PANEL = 'cockpit-git'
 
 export const DEFAULT_QUICK: [RegExp, Quick[]][] = [
   [
@@ -97,3 +98,6 @@ export function until(ms: number): string {
   if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60}m`
   return `${m}m`
 }
+
+// The mark: a prompt in an 8x8 bitmap, drawn as square cells (rows from 6 down are the cursor line).
+export const MARK = ['#.......', '.#......', '..#.....', '.#......', '#.......', '........', '....####', '........']

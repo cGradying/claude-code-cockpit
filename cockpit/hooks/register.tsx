@@ -1,6 +1,7 @@
 import type { Register } from 'claude-code'
 
 import { register as band } from './band'
+import { register as git } from './git'
 import { register as guards } from './guards'
 import { register as panel } from './panel'
 
@@ -9,5 +10,6 @@ import { register as panel } from './panel'
 export const register: Register = (on, options) => {
   band(on, options)
   panel(on)
+  git(on)
   guards(on, options)
 }
