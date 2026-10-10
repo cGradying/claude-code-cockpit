@@ -15,6 +15,7 @@ One line above the prompt: the cache countdown (`◔ 42m`), context, and the nex
 |---|---|---|
 | Continue | `c` | Sends "continue with the next task" for the first open line of the project's `.claude/NEXT.md`. |
 | Git | `g` | Opens the git panel (also `/git`): branch state, your open and stacked PRs in merge order, worktrees, and a Tidy up for merged leftovers. Its buttons ask Claude to do the change; the panel only reads. |
+| Polish | | Not a band button: `/polish` cleans dictated prompts with Haiku (`/polish auto|always|off`, `/polish say <heard> = <right>`, `/polish vocab`, `/polish last`). |
 | Details | `d` | Opens the Cockpit panel (also `/cockpit`), which has a Mods section with buttons for the agents panel, file tree, replay, skin, reflect and keep-warm. |
 | Compact | `k` | Appears past 70% context. Runs `/compact` and tells it to keep the plan, open tasks, PRs, decisions and open bugs. |
 

@@ -24,6 +24,12 @@ These mods run inside every Claude Code session, with your user's permissions an
 - Reads `HOME` to find the global file, and `~/.claude/CLAUDE.md` to avoid duplicates.
 - Starts paused here.
 
+### polish (this repo)
+- One `model.complete` call to Haiku per prompt that reads like dictation (or per prompt in `always`): a fixed instruction, your vocabulary list and your message, which is marked as data. Output is capped at about a third of the prompt's length plus 120 tokens, with a 10 second timeout. No process, no file, no network of its own.
+- Never sent: slash commands, prompts with code blocks, pastes over 2,500 characters, text shaped like an API key, prompts a plugin sent.
+- Stores in the plugin store: the mode, your added terms, learned term counts (single words only), taught mishearings, and your last raw and cleaned prompt for `/polish last`. The last raw prompt is stored in plain text on your machine; `/polish forget` and clearing the store remove them.
+- A cleanup is rejected and your words are sent if it is empty, a refusal, much shorter or longer, or missing a number or link from the original.
+
 ### skins
 - Process use: `defaults read -g AppleInterfaceStyle` (macOS) or `gsettings get org.gnome.desktop.interface color-scheme` (GNOME), only to learn light or dark, and only when nothing else decides it.
 - Redraws the transcript on screen only; what Claude reads and what is stored are unchanged.

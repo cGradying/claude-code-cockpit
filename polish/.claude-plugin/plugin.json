@@ -1,0 +1,25 @@
+{
+  "name": "polish",
+  "version": "0.1.0",
+  "description": "Cleans up dictated prompts with Haiku: drops the ums, false starts and spoken punctuation, and spells your jargon right. Learns your vocabulary as you type.",
+  "author": {
+    "name": "cGradying"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "mode": {
+      "type": "string",
+      "title": "When to clean a prompt",
+      "description": "auto cleans a prompt only when it reads like dictation (fillers, stutters, spoken punctuation, one long run-on). always cleans every prompt you type. off never does. Each cleaned prompt is one small Haiku request. A choice made with /polish is remembered and wins over this setting.",
+      "default": "auto",
+      "options": ["auto", "always", "off"]
+    },
+    "review": {
+      "type": "string",
+      "title": "Send the cleaned prompt or show it first",
+      "description": "send sends the cleaned prompt at once (Claude also gets your raw words as a hidden note). review puts the cleaned prompt back in the box and waits for Enter.",
+      "default": "send",
+      "options": ["send", "review"]
+    }
+  }
+}

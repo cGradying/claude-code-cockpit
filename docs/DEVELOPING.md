@@ -29,7 +29,7 @@ claude plugin validate cockpit           # one plugin
 claude plugin test cockpit
 ```
 
-Expected results: cockpit 37 tests, cache-tax 59, reflect-mod 3, skins 58, filetree 35 of 36, and replay-theater, blast-radius and savvy-progress validate with no tests (upstream ships none). The one filetree failure (`sidebar only: no pane in the default layout...`) fails identically on untouched upstream.
+Expected results: cockpit 44 tests, polish 11, cache-tax 59, reflect-mod 3, skins 58, filetree 35 of 36, and replay-theater, blast-radius and savvy-progress validate with no tests (upstream ships none). The one filetree failure (`sidebar only: no pane in the default layout...`) fails identically on untouched upstream.
 
 To try a plugin without installing it, start Claude Code with `claude --plugin-dir ./cockpit`.
 

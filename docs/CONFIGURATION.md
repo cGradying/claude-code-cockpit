@@ -22,6 +22,8 @@ Some plugins declare settings. Claude Code shows them when you install the plugi
 | filetree | `glyphs` | `auto` | `auto`, `nerd`, `plain` | Icon set. `auto` uses Nerd Font icons when one is installed, except in the desktop app. |
 | filetree | `follow` | `on` | `on`, `off` | Whether the tree scrolls to what Claude reads, writes or commits. |
 | filetree | `column` | `date` | `date`, `size` | What the right column shows. |
+| polish | `mode` | `auto` | `auto`, `always`, `off` | `auto` cleans only prompts that read like dictation. `always` cleans every prompt you type. `off` never does. A choice made with `/polish` is remembered and wins. |
+| polish | `review` | `send` | `send`, `review` | `send` sends the cleaned prompt at once. `review` puts it back in the box for Enter. |
 | savvy-progress | `language` | `auto` | `auto`, `en`, `ru` | Panel language. |
 
 claude-reflect and skins start quiet through their stored preferences, not settings: run `/reflect-pause` to turn the check on, and `/skin <name>` to turn a skin on. Those choices are remembered.

@@ -92,6 +92,28 @@ Every button sends a prompt to Claude (`Commit` asks it to group and commit, `Me
 
 The guard applies when the context is at least 50,000 tokens and the cache has gone cold, to non-slash prompts that you typed.
 
+## polish
+
+Dictation (macOS, Whisper Flow and the like) leaves the ums, restarts and spoken punctuation in your prompt. polish sends such a prompt to Haiku, which returns the message you meant, and the cleaned text is what Claude gets. It also learns your jargon.
+
+**When it runs.** In `auto` (the default) only on a prompt that reads like dictation: two or more of fillers (`um`, `uh`, `you know`, `I mean`, `basically`), a stuttered word (`the the`), spoken punctuation (`comma`, `new line`, `question mark`), or one long run-on with no punctuation. A clean typed prompt costs nothing and is never touched. It skips slash commands, anything with a code block, pastes over 2,500 characters, prompts under four words, text that looks like an API key, and prompts a plugin sent (the cockpit buttons). The check is on your machine; only a prompt that qualifies leaves it, and it goes to Haiku through your own session.
+
+**What Claude gets.** The cleaned text, plus a hidden note holding your raw words, so a cleanup that dropped something can be recovered. If Haiku times out or its answer looks wrong (lost a number or link, much shorter or longer, a refusal), your own words go through untouched.
+
+| Command | Does |
+|---|---|
+| `/polish` | Shows the mode and the size of your vocabulary. |
+| `/polish auto`, `always`, `off` | When to clean. `always` cleans every prompt you type; `on` is the same as `always`. |
+| `/polish send`, `review` | `send` sends the cleaned prompt at once (default). `review` puts it back in the box and waits for Enter. |
+| `/polish add <term>` | Always spell this term exactly: `/polish add PUPSISPortal`. |
+| `/polish say <heard> = <right>` | Teach a mishearing: `/polish say pupsis portal = PUPSISPortal`. It is fixed before Haiku sees it. |
+| `/polish vocab` | What you added, what it learned (seen three or more times), and your mishearings. |
+| `/polish forget <term>` | Removes a term or mishearing. |
+| `/polish last` | Your words next to the cleaned version. |
+| `/polish test <text>` | Cleans the text and shows it, without sending anything. |
+
+**Learning your jargon.** It starts with a seed of the author's terms. From then on, every prompt you type is scanned on your machine for words that look like yours (camelCase, ALL CAPS, letters with digits like `9router`, snake_case, hyphenated names, capitalised words mid-sentence). A word seen three times joins the list Haiku is told to spell exactly. The counts are kept in the plugin store and never leave your machine except as that list.
+
 ## claude-reflect (`reflect-mod`)
 
 | Command | Does |

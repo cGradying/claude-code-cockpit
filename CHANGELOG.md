@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0
+
+- **New plugin `polish`: clean up dictated prompts with Haiku.** A prompt that reads like dictation (fillers, a stuttered word, spoken punctuation, one long run-on) is sent to Haiku, which drops the ums and false starts, keeps only your final version when you corrected yourself, turns "slash filetree" into `/filetree`, and spells your jargon the way you do. Claude receives the cleaned text plus your raw words as a hidden note. If the answer looks wrong, your words go through untouched. It learns your vocabulary from what you type (`/polish vocab`), and you can teach it mishearings (`/polish say pupsis portal = PUPSISPortal`). Commands: `/polish auto|always|off`, `send|review`, `add`, `say`, `forget`, `vocab`, `last`, `test`.
+- The Cockpit panel's Mods list has a Polish row (Auto, Always, Off).
+- cockpit now depends on `polish`, so installing cockpit installs it.
+
 ## 0.5.1
 
 - **Git panel redesigned like VS Code's Source Control**: a green status bar with the branch and `↑ahead ↓behind`, a commit message box (Enter commits everything with exactly that message), a Changes list with VS Code's letters (`M` modified, `A` added, `D` deleted, `U` new, `R` renamed), a Graph of the last 12 commits with short times and one ref each, and folding sections with square counts. Your folds are remembered. The worktree list marks the one you are in.

@@ -23,6 +23,7 @@ These are screenshots of the real desktop app, showing the dark theme.
 | Plugin | What it does | Default here | Origin |
 |---|---|---|---|
 | **cockpit** | The band, the Cockpit panel, next-task list, Continue / What's next / Compact buttons, guards, and a cheat-sheet skill | on | this repo (MIT) |
+| **polish** | Cleans dictated prompts with Haiku: drops ums, stutters and false starts, turns spoken punctuation into symbols, spells your jargon right, learns your vocabulary | **auto**: only prompts that read like dictation | this repo (MIT) |
 | cache-tax | Shows the rewrite price before a cold send; opt-in keep-warm for the prompt cache | warns, never drops; keep-warm **off** | [karanb192/cache-tax](https://github.com/karanb192/cache-tax) |
 | claude-reflect (`reflect-mod`) | Notices corrections and offers to save them as rules in `CLAUDE.md` | **paused** | [BayramAnnakov/claude-reflect](https://github.com/BayramAnnakov/claude-reflect) |
 | skins | Redraws the transcript: tool rows, diff cards, table and code cards, spinner | **off**, its own band off | [hellosverre/claude-skins](https://github.com/hellosverre/claude-skins) |
@@ -67,11 +68,11 @@ To remove everything: `/plugin`, pick `cockpit`, uninstall, and do the same for 
 
 **Guards that run quietly.** A shell command carrying a Claude or Anthropic co-author line is refused. A prompt containing a pasted API key is held once (press Enter again to send it anyway). Prompts about UI or design get a hidden nudge toward the `impeccable` skill if you have it.
 
-**Commands.** `/cockpit`, `/next`, `/keepwarm`, `/cache-tax`, `/reflect-pause`, `/reflect-queue`, `/skin`, `/filetree`, `/replay`, `/agents-info`. Details in [docs/COMMANDS.md](docs/COMMANDS.md); inside Claude Code, the `cockpit:help` skill prints the same cheat sheet.
+**Commands.** `/cockpit`, `/git`, `/polish`, `/next`, `/keepwarm`, `/cache-tax`, `/reflect-pause`, `/reflect-queue`, `/skin`, `/filetree`, `/replay`, `/agents-info`. Details in [docs/COMMANDS.md](docs/COMMANDS.md); inside Claude Code, the `cockpit:help` skill prints the same cheat sheet.
 
 ## Quiet by default
 
-Three things in the bundle can cost tokens or change your screen, so they start off:
+One thing runs by itself and costs a little: **polish** sends a prompt to Haiku only when it reads like dictation (ums, stutters, spoken punctuation, one long run-on), roughly a few hundred tokens each. `/polish off` stops it. Three other things can cost tokens or change your screen, so they start off:
 
 - **Keep-warm** (cache-tax) sends a real model request about every 50 minutes while armed. It is off; you arm it with `/keepwarm`. The cold-send guard only *warns* by default: it shows the rewrite price and still sends your message.
 - **Correction checking** (claude-reflect) sends short prompts to Haiku. It starts paused; `/reflect-pause` turns it on. `remember: <rule>` works either way and needs no model.

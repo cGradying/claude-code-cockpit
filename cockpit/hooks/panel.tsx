@@ -74,6 +74,15 @@ const MODS: { name: string; note: string; actions: { label: string; command: str
       { label: 'Off', command: 'skin', args: 'off' },
     ],
   },
+  {
+    name: 'Polish',
+    note: 'clean dictated prompts (Haiku)',
+    actions: [
+      { label: 'Auto', command: 'polish', args: 'auto' },
+      { label: 'Always', command: 'polish', args: 'always' },
+      { label: 'Off', command: 'polish', args: 'off' },
+    ],
+  },
   { name: 'Reflect', note: 'catch corrections (uses Haiku)', actions: [{ label: 'On / off', command: 'reflect-pause' }] },
   {
     name: 'Keep-warm',

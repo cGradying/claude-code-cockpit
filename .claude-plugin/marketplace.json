@@ -46,6 +46,11 @@
       "name": "skins",
       "source": "./skins",
       "description": "Skins for the transcript, /skin to swap (hellosverre, MIT). Patched: starts off, own band off."
+    },
+    {
+      "name": "polish",
+      "source": "./polish",
+      "description": "Cleans dictated prompts with Haiku and learns your jargon (cGradying, MIT). Cleans only prompts that read like dictation."
     }
   ]
 }

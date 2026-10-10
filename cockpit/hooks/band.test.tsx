@@ -179,7 +179,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await clock.settle()
     const tree = await text(await panel($, surface))
 
-    for (const word of ['Prompt cache', '42m left', 'Context', '72.5k tokens', '36%', '200k', '"width":"36%"', 'Plan limits', '5-hour limit', 'Weekly limit', 'resets in 2h 10m', '$0.21', 'Next up', 'Write PLAN-2.md', 'Later thing', 'Mods', 'Agents & progress', 'File tree', 'Replay', 'Skin', 'Reflect', 'Keep-warm', 'Shortcuts', 'Rebuild']) {
+    for (const word of ['Prompt cache', '42m left', 'Context', '72.5k tokens', '36%', '200k', '"width":"36%"', 'Plan limits', '5-hour limit', 'Weekly limit', 'resets in 2h 10m', '$0.21', 'Next up', 'Write PLAN-2.md', 'Later thing', 'Mods', 'Agents & progress', 'File tree', 'Replay', 'Skin', 'Polish', 'Reflect', 'Keep-warm', 'Shortcuts', 'Rebuild']) {
       expect(tree).toContain(word)
     }
     if (surface === 'desktop') expect(tree).toContain('xmlns=') // the header drawing is an image, which needs its namespace
