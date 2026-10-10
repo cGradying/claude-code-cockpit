@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- savvy-progress `1.2.0+cockpit.2`: the progress bar and the agents panel were SVG and showed blank in the desktop app. They now use Claude's own text. The bar still appears only once a flow reports progress; `/agents-info` opens the panel any time.
+
 ## 0.3.0
 
 - **The band is native.** The SVG card (which rendered blank in the desktop app and caused the white edge, flash and shrinking) is gone. The band is one row of Claude's own text and buttons: cache countdown, context, the next task, Continue and Details. Limits appear on it only past 60%; 9router only when it stops answering.

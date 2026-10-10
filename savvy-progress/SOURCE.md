@@ -11,6 +11,7 @@ This is a vendored copy, kept as close to upstream as possible.
 ## Changes from upstream
 
 - hooks/register.tsx: the AbovePrompt hook awaits `next(e)` and stacks its bar above it (it used to return without calling next).
+- hooks/register.tsx: the SVG branches (bar above the prompt and agents panel) are switched off, because SVG renders blank in the desktop app. The native Box/Text versions are used instead.
 - hooks/register.tsx: the accent colour is the cockpit clay (#d97757) instead of purple.
 
 ## Checks
